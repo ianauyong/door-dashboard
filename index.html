@@ -83,6 +83,7 @@ button.warn span{opacity:.7}
 .rows.dense .row{padding:1px 0}
 .rows.dense .etas{font-size:clamp(20px,4.4vh,38px)}
 .rows.dense .plate{font-size:clamp(18px,3.4vh,27px)}
+.plate.night{background:#23324A;color:#F3C23C;box-shadow:inset 0 0 0 2px #F3C23C}
 .plate{font-family:var(--display);font-weight:700;font-size:clamp(20px,3.8vh,30px);background:var(--plate);color:var(--plate-ink);border-radius:5px;text-align:center;padding:2px 0 0}
 .etas{font-family:var(--display);font-size:clamp(24px,5.2vh,44px);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
 .etas .n{margin-right:8px}
@@ -147,6 +148,8 @@ input,select{font:500 16px var(--font);color:var(--text);background:var(--field)
 .panel-set:first-of-type{border-top:0;margin-top:0;padding-top:0}
 .rt{display:grid;grid-template-columns:110px minmax(0,1.1fr) minmax(0,1.3fr);gap:8px;margin-top:6px}
 .rt-head{font-size:12px;color:var(--muted)}
+.night-pick{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);margin:-2px 0 8px}
+.night-pick .pick-btn{width:auto;min-width:240px;min-height:36px;font-size:15px}
 .pe-rt,#pe-rows .rt{grid-template-columns:minmax(150px,.9fr) minmax(0,1fr) minmax(0,1.3fr) 44px}
 .rt .rm{font:600 20px var(--font);color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:8px;min-height:40px}
 .rt .rm:active{background:var(--line)}
@@ -615,7 +618,7 @@ let pkSel = null;
 function openPicker(sel){
   pkSel = sel;
   const t = (sel.getAttribute("aria-label") || "Choose").replace(/^Panel \d+ /, "").replace(/ \d+$/, "");
-  $("pkTitle").textContent = "Choose a " + t.toLowerCase();
+  $("pkTitle").textContent = (/^[aeiou]/i.test(t) ? "Choose an " : "Choose a ") + t.toLowerCase();
   $("pkSearch").value = "";
   renderPicker();
   $("picker").classList.add("open");
@@ -942,14 +945,57 @@ async function etasFor(r){
     const right = out.filter(e => dw.some(w => norm(e.dest_en).includes(w)));
     return { found: stops.length > 0, etas: dw.length && right.length ? right : out };
   }
-  const L = d => d === "inbound" ? "I" : "O";
-  if (op === "KMB") await pull(`${KMB}/eta/${r.stopId}/${encodeURIComponent(route)}/1`, L(r.dir));
-  else await pull(`${CTB}/eta/CTB/${r.stopId}/${encodeURIComponent(route)}`, L(r.dir));
-  if (op === "JOINT"){
-    const t = await kmbTwin({ ...r, route });
-    if (t) await pull(`${KMB}/eta/${t.stopId}/${encodeURIComponent(route)}/1`, L(t.dir));
+  out.push(...await liveETAs({ ...r, op, route }));
+  // Once the day route has finished, switch to its overnight route (e.g. 90 -> N90)
+  if (!out.some(e => e.eta)){
+    const n = await nightRoute({ ...r, op, route }, routes);
+    if (n){
+      const ne = await liveETAs(n);
+      if (ne.some(e => e.eta)) return { found: true, etas: ne, night: n };
+    }
   }
   return { found: true, etas: out };
+}
+async function liveETAs(r){
+  const out = [], L = d => d === "inbound" ? "I" : "O", R = encodeURIComponent(r.route);
+  const pull = async (url, dirLetter) => {
+    try { const j = await getJSON(url); out.push(...(j.data || []).filter(e => e.dir === dirLetter && (e.service_type == null || String(e.service_type) === "1"))); } catch {}
+  };
+  if (r.op === "KMB") await pull(`${KMB}/eta/${r.stopId}/${R}/1`, L(r.dir));
+  else await pull(`${CTB}/eta/CTB/${r.stopId}/${R}`, L(r.dir));
+  if (r.op === "JOINT"){
+    const t = await kmbTwin(r);
+    if (t) await pull(`${KMB}/eta/${t.stopId}/${R}/1`, L(t.dir));
+  }
+  return out;
+}
+// Overnight partner: "auto" finds N + route number; "none" turns it off; otherwise a route key like "CTB|N90"
+function nightAutoKey(op, route, routes){
+  if (/^N/i.test(route)) return "";
+  const want = "N" + route.toUpperCase();
+  const order = op === "KMB" ? ["KMB","JOINT","CTB"] : ["JOINT","CTB","KMB"];
+  for (const o of order){ const hit = routes.find(x => x.op === o && x.route === want); if (hit) return hit.key; }
+  return "";
+}
+async function nightRoute(r, routes){
+  const key = !r.night || r.night === "auto" ? nightAutoKey(r.op, r.route, routes) : r.night === "none" ? "" : r.night;
+  if (!key) return null;
+  const [nop, nroute] = key.split("|");
+  const cacheKey = `night:${key}|${r.op}|${r.route}|${r.dir}|${r.stopId}`;
+  const c = store.get(cacheKey); if (c) return c.none ? null : c;
+  const src = r.op === "KMB" ? "KMB" : "CTB", nsrc = nop === "KMB" ? "KMB" : "CTB";
+  const base = await dirStops(src, r.route, r.dir);
+  const me = base.find(x => x.id === r.stopId), end = base[base.length - 1];
+  let best = null;
+  if (me && end) for (const dir of ["outbound","inbound"]){
+    const list = await dirStops(nsrc, nroute, dir);
+    if (!list.length) continue;
+    const endGap = dist(list[list.length - 1], end);
+    const near = list.reduce((m, x) => { const d = dist(x, me); return d < m.d ? { x, d } : m; }, { x: null, d: Infinity });
+    if (near.x && near.d < 200 && (!best || endGap < best.endGap)) best = { op: nop, route: nroute, dir, stopId: near.x.id, stopName: near.x.name, endGap };
+  }
+  store.set(cacheKey, best || { none: true });
+  return best;
 }
 
 async function loadBuses(){
@@ -961,13 +1007,14 @@ async function loadBuses(){
     try {
       const rows = [];
       for (const r of routes){
-        const { found, etas } = await etasFor(r);
+        const { found, etas, night } = await etasFor(r);
         const now = Date.now();
         const list = etas.filter(e => e.eta).map(e => ({ m: Math.max(0, Math.round((new Date(e.eta) - now)/60000)), dest: tidy(e.dest_en) }))
           .sort((a,b) => a.m - b.m).filter((e,k,a) => k === 0 || e.m !== a[k-1].m).slice(0,2);
         const note = etas.find(e => !e.eta)?.rmk_en;
-        const from = mixed ? esc(stopLabel(r)) + " to " : "to ";
-        rows.push(`<div class="row"><div class="plate">${esc(r.route.toUpperCase())}</div><div>` +
+        const nightStop = night && norm(stopLabel(night)) !== norm(stopLabel(r)) ? stopLabel(night) : "";
+        const from = nightStop ? esc(nightStop) + " to " : mixed ? esc(stopLabel(r)) + " to " : "to ";
+        rows.push(`<div class="row"><div class="plate ${night ? "night" : ""}">${esc((night ? night.route : r.route).toUpperCase())}</div><div>` +
           (!found ? `<div class="msg">Stop not found. Pick the stop again in Settings.</div>` :
            !list.length ? `<div class="msg">${esc(note || "No buses scheduled right now")}</div>` :
            `<div class="etas">${list.map((e,k) => `<span class="n ${k ? "" : "next"}">${e.m === 0 ? "Now" : e.m + '<span class="u">min</span>'}</span>`).join("")}</div>
@@ -1432,12 +1479,23 @@ let pendingRows = 0;
 function status(){ document.querySelectorAll(".set-status").forEach(el => { if (!el.dataset.err) el.textContent = pendingRows ? "Loading bus stops…" : ""; }); }
 const rowKey = (r, byKey) => { if (!r) return ""; const R = r.route.toUpperCase();
   return r.op ? `${r.op}|${R}` : (byKey["JOINT|" + R] ? "JOINT|" + R : "CTB|" + R); };   // older rows used Citybus stops
+function fillNight(row, routes, want){
+  const ns = row.querySelector(".r-night"); if (!ns) return;
+  const key = row.querySelector(".r-route").value;
+  if (!key){ ns.innerHTML = `<option value="auto">Overnight route (automatic)</option>`; ns.value = "auto"; ns.disabled = true; return; }
+  const [op, R] = key.split("|"), auto = nightAutoKey(op, R, routes), autoLbl = auto ? routes.find(x => x.key === auto)?.label : "";
+  ns.innerHTML = `<option value="auto">${auto ? `Automatic: ${esc(autoLbl)}` : "Automatic: none found"}</option><option value="none">No overnight route</option>` +
+    routes.filter(x => /^N/.test(x.route)).map(x => `<option value="${esc(x.key)}">${esc(x.label)}</option>`).join("");
+  ns.disabled = false;
+  ns.value = want && [...ns.options].some(o => o.value === want) ? want : "auto";
+}
 function setupRow(row, routes, byKey, r){
   const sel = row.querySelector(".r-route"), key = rowKey(r, byKey);
   sel.innerHTML = `<option value="">None</option>` + (key && !byKey[key] ? `<option value="${esc(key)}">${esc(r.route)}</option>` : "") +
     routes.map(x => `<option value="${esc(x.key)}">${esc(x.label)}</option>`).join("");
-  sel.value = key; row._byKey = byKey;
-  sel.onchange = () => loadRow(row, null);
+  sel.value = key; row._byKey = byKey; row._night = r?.night; row._routes = routes;
+  fillNight(row, routes, r?.night);
+  sel.onchange = () => { fillNight(row, routes, null); loadRow(row, null); };
   if (r) loadRow(row, r);
 }
 async function fillRouteRows(src){
@@ -1496,7 +1554,9 @@ function readRow(row){
   const [op, route] = key.split("|");
   const dir = row.querySelector(".r-dir").value, stopId = row.querySelector(".r-stop").value;
   const st = (row._stops?.[dir] || []).find(x => x.id === stopId);
-  return { op, route, dir, stopId, stopName: st?.name || "" };
+  const ns = row.querySelector(".r-night");
+  const night = ns ? ns.value : row._night;
+  return { op, route, dir, stopId, stopName: st?.name || "", ...(night && night !== "auto" ? { night } : {}) };
 }
 
 /* ---- edit a single bus panel ---- */
@@ -1507,7 +1567,8 @@ function peRow(r){
   row.innerHTML = `<select class="r-route searchable" aria-label="Route"></select>
     <select class="r-dir" aria-label="Direction" disabled></select>
     <select class="r-stop searchable" aria-label="Stop" disabled></select>
-    <button class="rm" aria-label="Remove this route">×</button>`;
+    <button class="rm" aria-label="Remove this route">×</button>
+    <label class="night-pick">After the last bus, show <select class="r-night searchable" aria-label="Overnight route"></select></label>`;
   row.querySelector(".rm").onclick = () => { row.remove(); peCount(); };
   $("pe-rows").appendChild(row);
   enhanceSelects(row);

@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Door dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#172230; --panel:#1F2D3D; --line:#2E4053; --text:#EEF1F4; --muted:#93A3B5;
+  --plate:#F3C23C; --plate-ink:#1B1B1B; --soon:#7FD6A4; --amber:#F2A93B; --red:#E0463C;
+  --field:#15202C;
+  --font:"Barlow",system-ui,sans-serif;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+}
+:root[data-theme="light"]{
+  --bg:#E6ECF1; --panel:#FFFFFF; --line:#D2DBE3; --text:#15212D; --muted:#5A6B7C;
+  --soon:#16804B; --amber:#B86E00; --red:#C8322A; --field:#F3F6F9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden;-webkit-user-select:none;user-select:none}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{height:100%;display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;padding:12px 14px}
+.top{grid-row:1}.warns{grid-row:2}.main{grid-row:3}.bottom{grid-row:4}
+
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.clock{font-family:var(--display);font-weight:600;font-size:clamp(56px,11vh,96px);line-height:.85;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.clock small{font-size:.38em;font-weight:500;color:var(--muted);margin-left:4px}
+.date{font-size:18px;color:var(--muted);margin-top:6px}
+.hol{flex:1;min-width:0;align-self:center;text-align:center;padding:0 12px}
+.hol:empty{visibility:hidden}
+.hol .k{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.hol .n{font-family:var(--display);font-size:clamp(22px,4.4vh,34px);font-weight:600;line-height:1.1;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hol .d{font-size:15px;color:var(--muted);margin-top:2px}
+.hol .d b{color:var(--soon);font-weight:600}
+.hol.today .n{color:var(--soon)}
+.hol{cursor:pointer;touch-action:manipulation;border-radius:10px}
+.hol:focus-visible{outline:3px solid var(--plate)}
+.hol-body{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-content:start}
+.hol-year{grid-column:1/-1;font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:6px 2px 0}
+.hol-year:first-child{margin-top:0}
+.hday{background:var(--panel);border-radius:12px;padding:10px 14px;display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:12px;align-items:center}
+.hday .cal{padding:0;text-align:center;line-height:1}
+.hday .cal b{display:block;font-family:var(--display);font-size:30px;font-weight:600}
+.hday .cal small{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.hday .nm{font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hday .wd{font-size:14px;color:var(--muted);margin-top:2px}
+.hday .brk{font-size:13px;font-weight:600;color:var(--plate-ink);background:var(--plate);border-radius:6px;padding:3px 8px;white-space:nowrap}
+.hday .when{font-size:14px;font-weight:600;color:var(--soon);text-align:right;white-space:nowrap}
+.hday.next{outline:2px solid var(--soon);outline-offset:-2px}
+@media (orientation:portrait){ .hol-body{grid-template-columns:1fr} }
+.wx{display:flex;align-items:center;gap:12px;text-align:right}
+.wx img{width:56px;height:56px}
+.wx-place{font-size:15px;font-weight:600;margin-bottom:2px}
+.temp{font-family:var(--display);font-size:52px;font-weight:600;line-height:.9}
+.wx-sub{font-size:15px;color:var(--muted);line-height:1.35}
+.uv-hi{color:var(--amber);font-weight:600}
+.uv-vhi{color:var(--red);font-weight:600}
+
+.warns{display:flex;flex-wrap:wrap;gap:6px}
+.warns:empty{display:none}
+.warn{font-weight:600;font-size:16px;padding:6px 12px;border-radius:6px;background:#F2A93B;color:#1b1206}
+.warn.red{background:#E0463C;color:#fff}
+
+.main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,.85fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:10px;min-height:0}
+.col{background:var(--panel);border-radius:12px;padding:10px 14px;min-height:0;display:flex;flex-direction:column}
+.col h2{margin-bottom:4px;font-size:16px;font-weight:600;line-height:1.2;display:flex;align-items:center;gap:8px}
+.col .where{font-size:12px;color:var(--muted);margin:-3px 0 4px}
+.rows{flex:1;display:flex;flex-direction:column;min-height:0}
+.row{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:clamp(54px,9.5vh,80px) minmax(0,1fr);gap:12px;align-items:center;padding:3px 0;border-top:1px solid var(--line)}
+.rows.dense .row{padding:1px 0}
+.rows.dense .etas{font-size:clamp(20px,4.4vh,38px)}
+.rows.dense .plate{font-size:clamp(18px,3.4vh,27px)}
+.plate{font-family:var(--display);font-weight:700;font-size:clamp(20px,3.8vh,30px);background:var(--plate);color:var(--plate-ink);border-radius:5px;text-align:center;padding:2px 0 0}
+.etas{font-family:var(--display);font-size:clamp(24px,5.2vh,44px);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.etas .n{margin-right:8px}
+.etas .n.next{color:var(--soon)}
+.etas .n:not(.next){color:var(--muted);font-size:.65em}
+.etas .u{font-size:.55em;font-weight:500;margin-left:2px}
+.dest{font-size:clamp(11px,2vh,15px);margin-top:1px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg{font-size:14px;color:var(--muted);padding:8px 0;line-height:1.4}
+
+.side{grid-column:3;grid-row:1/span 2;display:flex;flex-direction:column;gap:10px;min-height:0}
+.mtr{flex:none}
+.mtr .stn{font-size:12px;color:var(--muted);margin-top:4px}
+.mtr .tr{display:grid;grid-template-columns:6px minmax(0,1fr) auto;gap:8px;align-items:center;padding:2px 0}
+.mtr .bar{height:18px;border-radius:3px}
+.mtr .to{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtr .t{font-family:var(--display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.mtr .t .first{color:var(--soon)}
+.mtr .t .rest{color:var(--muted);font-size:.8em}
+.mtr .delay{font-size:12px;font-weight:600;color:var(--amber)}
+.cal{padding:10px 12px 6px;flex:1}
+.cal iframe{flex:1;width:100%;border:0;border-radius:8px;margin-top:4px}
+:root[data-theme="dark"] .calframe{filter:invert(.9) hue-rotate(180deg) contrast(.9)}
+.link{margin-left:auto;font:600 14px var(--font);color:var(--soon);background:none;border:0;padding:4px 2px;min-height:32px}
+
+.bottom{display:flex;gap:10px;align-items:center}
+.btn{font:600 16px var(--font);color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 16px;min-height:44px}
+.btn:active{background:var(--line)}
+.btn.primary{background:var(--plate);color:var(--plate-ink);border-color:var(--plate)}
+.btn:focus-visible,.link:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--plate);outline-offset:2px}
+.updated{margin-left:auto;font-size:13px;color:var(--muted)}
+
+/* overlays */
+.overlay{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:10;padding:12px 14px}
+.overlay.open{display:flex}
+.ov-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ov-head h2{font-size:22px;font-weight:600;margin-right:auto}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{font:600 15px var(--font);color:var(--text);background:var(--panel);border:0;padding:8px 14px;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--plate);color:var(--plate-ink)}
+#calFull{flex:1;width:100%;border:0;border-radius:10px}
+
+.set-body{flex:1;overflow:auto;-webkit-user-select:text;user-select:text;padding-bottom:20px}
+.set-body section{background:var(--panel);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.set-body h3{font-size:17px;font-weight:600;margin-bottom:8px}
+.set-body .hint{font-size:13px;color:var(--muted);margin:-2px 0 10px;line-height:1.4;max-width:70ch}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+input,select{font:500 16px var(--font);color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;width:100%}
+.check{flex-direction:row;align-items:center;gap:8px;font-size:15px;color:var(--text)}
+.check input{width:22px;min-height:22px}
+.panel-set{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.panel-set:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.rt{display:grid;grid-template-columns:110px minmax(0,1.1fr) minmax(0,1.3fr);gap:8px;margin-top:6px}
+.rt-head{font-size:12px;color:var(--muted)}
+.rt select:disabled{opacity:.55}
+.set-status{font-size:13px;color:var(--muted);margin-top:6px}
+#clockBox{cursor:pointer;touch-action:manipulation;border-radius:10px;padding:2px 6px 4px;margin:-2px -6px -4px}
+#clockBox:focus-visible{outline:3px solid var(--plate)}
+#toast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);background:var(--text);color:var(--bg);font:600 15px var(--font);padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:15}
+#toast.show{opacity:1}
+
+#wxBox{cursor:pointer;touch-action:manipulation;border-radius:10px;padding:2px 6px;margin:-2px -6px}
+#wxBox:focus-visible{outline:3px solid var(--plate)}
+.wx-body{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr);gap:10px}
+.wx-top{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px;min-height:0}
+.wx-card{background:var(--panel);border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;min-height:0}
+.wx-card .lbl{font-size:16px;font-weight:600;color:var(--muted)}
+.hero{flex:1;display:flex;align-items:center;gap:18px;min-height:0}
+.hero img{width:clamp(90px,22vh,150px);height:clamp(90px,22vh,150px)}
+.hero .big{font-family:var(--display);font-weight:600;font-size:clamp(64px,17vh,120px);line-height:.85}
+.hero > div{min-width:0}
+.hero.tmr2 .big{font-size:clamp(56px,14vh,100px)}
+.hero.tmr2 .lo{font-size:clamp(30px,7vh,52px)}
+.hero .lo{font-family:var(--display);font-weight:600;font-size:clamp(34px,8vh,60px);color:var(--muted);margin-left:6px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:17px;font-weight:600}
+.stats span{color:var(--muted);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chips:empty{display:none}
+.days8{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;min-height:0}
+.day{background:var(--panel);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;min-height:0}
+.day b{font-size:17px}
+.day img{width:clamp(44px,11vh,72px);height:clamp(44px,11vh,72px)}
+.day .hi{font-family:var(--display);font-size:clamp(24px,5vh,34px);font-weight:600;line-height:1}
+.day .lo2{font-family:var(--display);font-size:clamp(18px,3.6vh,24px);font-weight:600;color:var(--muted);line-height:1}
+.rainbar{display:flex;gap:3px;margin-top:6px}
+.rainbar i{width:10px;height:6px;border-radius:2px;background:var(--line)}
+.rainbar i.on{background:#4BA3E3}
+.rainrow{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted)}
+.rainrow .rainbar{margin-top:0}
+.rainrow .rainbar i{width:16px;height:9px}
+@media (orientation:portrait){ .wx-top{grid-template-columns:1fr} .days8{grid-template-columns:repeat(4,minmax(0,1fr))} .wx-body{grid-template-rows:auto auto;overflow:auto} }
+#dim{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity 1.5s;z-index:20}
+body.night #dim{opacity:.65;pointer-events:auto}
+
+@media (orientation:portrait){
+  html,body{overflow:auto}
+  .main{grid-template-columns:1fr 1fr;grid-template-rows:none}
+  .side{grid-column:1/-1;grid-row:auto}
+  .cal{min-height:320px}
+}
+@media (max-width:560px){ .main{grid-template-columns:1fr} .rt{grid-template-columns:64px 1fr} }
+@media (prefers-reduced-motion:reduce){#dim{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div id="clockBox" role="button" tabindex="0" aria-label="Switch between light and dark theme">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date"></div>
+    </div>
+    <div class="hol" id="holiday" role="button" tabindex="0" aria-label="Show public holidays"></div>
+    <div class="wx" id="wxBox" role="button" tabindex="0" aria-label="Open weather details">
+      <div>
+        <div class="wx-place" id="wxplace">Hong Kong</div>
+        <div class="temp" id="temp">--°</div>
+        <div class="wx-sub" id="wxsub">Loading weather…</div>
+      </div>
+      <img id="wxicon" alt="" hidden>
+    </div>
+  </header>
+
+  <div class="warns" id="warns"></div>
+
+  <main class="main" id="main">
+    <div class="side">
+      <section class="col mtr">
+        <h2>MTR</h2>
+        <div id="mtr-rows"><div class="msg">Loading trains…</div></div>
+      </section>
+      <section class="col cal" id="calbox">
+        <h2>Today <button class="link" id="btn-cal">Expand</button></h2>
+      </section>
+    </div>
+  </main>
+
+  <footer class="bottom">
+    <button class="btn" id="btn-ac">Aircon</button>
+    <button class="btn" id="btn-door">Doorbell</button>
+    <button class="btn" id="btn-refresh">Refresh</button>
+    <button class="btn" id="btn-settings">Settings</button>
+    <span class="updated" id="updated"></span>
+  </footer>
+</div>
+
+<!-- Full calendar -->
+<div class="overlay" id="calOverlay" role="dialog" aria-label="Calendar">
+  <div class="ov-head">
+    <h2>Calendar</h2>
+    <div class="seg" id="calModes">
+      <button data-mode="AGENDA" aria-pressed="true">List</button>
+      <button data-mode="DAY" aria-pressed="false">Day</button>
+      <button data-mode="WEEK" aria-pressed="false">Week</button>
+    </div>
+    <button class="btn" id="calClose">Close</button>
+  </div>
+  <iframe id="calFull" class="calframe" title="Calendar"></iframe>
+</div>
+
+<!-- Public holidays -->
+<div class="overlay" id="holOverlay" role="dialog" aria-label="Public holidays">
+  <div class="ov-head">
+    <h2>Public holidays</h2>
+    <button class="btn" id="holClose">Close</button>
+  </div>
+  <div class="hol-body" id="holBody"></div>
+</div>
+
+<!-- Weather details -->
+<div class="overlay" id="wxOverlay" role="dialog" aria-label="Weather details">
+  <div class="ov-head">
+    <h2>Weather</h2>
+    <button class="btn" id="wxClose">Close</button>
+  </div>
+  <div class="wx-body" id="wxBody"><div class="msg">Loading the forecast…</div></div>
+</div>
+
+<!-- Settings -->
+<div class="overlay" id="setOverlay" role="dialog" aria-label="Settings">
+  <div class="ov-head">
+    <h2>Settings</h2>
+    <button class="btn" id="setReset">Reset to defaults</button>
+    <button class="btn" id="setCancel">Cancel</button>
+    <button class="btn primary" id="setSave">Save</button>
+  </div>
+  <div class="set-body" id="setBody"></div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="dim"></div>
+
+<script>
+/* ======== DEFAULTS (Settings on screen override these) ======== */
+const DEFAULTS = {
+  calendarId: "",
+  clock24h: false,
+  theme: "sun",                                    // dark | light | sun (sunrise/sunset) | custom
+  themeCustom: { light: "07:00", dark: "19:00" },
+  nightDim: { on: true, from: "23:30", to: "06:30" },
+  weather: { station: "Happy Valley", label: "Wan Chai", rainDistrict: "Wan Chai" },
+  panels: [
+    { title: "To Central", routes: [
+      { route: "90",  stop: "Hennessy Rd Govt Primary Sch", to: "Central, Exchange Square, Admiralty, Sheung Wan" },
+      { route: "37A", stop: "Hennessy Rd Govt Primary Sch", to: "Central, Exchange Square, Admiralty, Sheung Wan" } ] },
+    { title: "To South Island", routes: [
+      { route: "90",  stop: "Burrows Street", to: "Aberdeen, Ap Lei Chau, Wong Chuk Hang, Chi Fu, South Horizons, Wah Kwai" },
+      { route: "37B", stop: "Burrows Street", to: "Aberdeen, Ap Lei Chau, Wong Chuk Hang, Chi Fu, South Horizons, Wah Kwai" } ] },
+    { title: "To Kwun Tong", routes: [
+      { route: "601", stop: "Stewart Road", to: "Po Tat, Shun Lee, Kwun Tong, Sau Mau Ping, Lam Tin" },
+      { route: "619", stop: "Stewart Road", to: "Po Tat, Shun Lee, Kwun Tong, Sau Mau Ping, Lam Tin" } ] },
+    { title: "To Airport and West", routes: [
+      { route: "A11", stop: "Stewart Road", to: "Airport" },
+      { route: "111", stop: "Bullock Lane", to: "Central, Macao, Macau" },
+      { route: "101", stop: "Bullock Lane", to: "Kennedy Town" } ] }
+  ]
+};
+const MTR_STATIONS = [
+  { line: "ISL", sta: "WAC", name: "Wan Chai", color: "#0075C2" },
+  { line: "EAL", sta: "EXC", name: "Exhibition Centre", color: "#5EB7E8" }
+];
+const APPS = { aircon: "com.tuya.smartlife", doorbell: "com.xiaomi.smarthome" };
+const MAX_PANELS = 4, MAX_ROUTES = 3;
+/* ============================================================= */
+
+const CTB = "https://rt.data.gov.hk/v2/transport/citybus";
+const HKO = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const getJSON = async url => { const r = await fetch(url); if (!r.ok) throw new Error(r.status); return r.json(); };
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} }
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+const S = Object.assign(clone(DEFAULTS), store.get("dashSettings") || {});
+if (!store.get("settingsV2")){                     // earlier versions defaulted to dark; switch to sunrise/sunset once
+  if (S.theme === "dark" || S.theme === "auto") S.theme = "sun";
+  const saved = store.get("dashSettings"); if (saved){ saved.theme = S.theme; store.set("dashSettings", saved); }
+  store.set("settingsV2", true);
+}
+
+/* ---- text matching for stop names and destinations ---- */
+const ABBR = { rd:"road", st:"street", govt:"government", sch:"school", ave:"avenue", ctr:"centre", sq:"square", stn:"station", est:"estate" };
+const norm = s => String(s || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(Boolean).map(w => ABBR[w] || w).join(" ");
+const words = s => String(s || "").split(",").map(norm).filter(Boolean);
+
+/* ---- theme: fixed, sunrise/sunset, or custom times ---- */
+const HK = { lat: 22.28, lon: 114.17 };
+function sunTimes(date){                     // standard sunrise equation, Hong Kong coordinates
+  const rad = Math.PI/180;
+  const hkDay = Math.floor((date.getTime() + 8*3600000) / 86400000);   // Hong Kong calendar date
+  const n = hkDay - 10957;                                               // days since 1 Jan 2000, at Hong Kong noon
+  const Js = n - HK.lon/360;
+  const M = (357.5291 + 0.98560028*Js) % 360;
+  const C = 1.9148*Math.sin(M*rad) + 0.02*Math.sin(2*M*rad) + 0.0003*Math.sin(3*M*rad);
+  const L = (M + C + 180 + 102.9372) % 360;
+  const Jt = 2451545 + Js + 0.0053*Math.sin(M*rad) - 0.0069*Math.sin(2*L*rad);
+  const dec = Math.asin(Math.sin(L*rad)*Math.sin(23.44*rad));
+  const w = Math.acos((Math.sin(-0.833*rad) - Math.sin(HK.lat*rad)*Math.sin(dec)) / (Math.cos(HK.lat*rad)*Math.cos(dec))) / rad;
+  const toDate = j => new Date((j - 2440587.5)*86400000);
+  return { rise: toDate(Jt - w/360), set: toDate(Jt + w/360) };
+}
+const atTime = (d, hhmm) => { const [h,m] = String(hhmm).split(":").map(Number); const x = new Date(d); x.setHours(h||0, m||0, 0, 0); return x; };
+const fmtTime = d => d.toLocaleTimeString(S.clock24h ? "en-GB" : "en-US", { hour: S.clock24h ? "2-digit" : "numeric", minute: "2-digit", timeZone: "Asia/Hong_Kong" }).toLowerCase();
+function scheduledTheme(now = new Date()){
+  if (S.theme === "dark" || S.theme === "light") return { t: S.theme, next: null };
+  const win = d => S.theme === "sun" ? (s => [s.rise, s.set])(sunTimes(d)) : [atTime(d, S.themeCustom.light), atTime(d, S.themeCustom.dark)];
+  const [a, b] = win(now);
+  const t = now >= a && now < b ? "light" : "dark";
+  const next = now < a ? a : now < b ? b : win(new Date(now.getTime() + 86400000))[0];
+  return { t, next };
+}
+let themeOverride = store.get("themeOverride");
+function applyTheme(){
+  let { t } = scheduledTheme();
+  if (themeOverride && Date.now() < themeOverride.until) t = themeOverride.theme;
+  else if (themeOverride){ themeOverride = null; store.del("themeOverride"); }
+  if (document.documentElement.dataset.theme !== t) document.documentElement.dataset.theme = t;
+}
+// Tap the clock to flip light/dark until the next sunrise, sunset or custom switch
+let lastFlip = 0;
+function flipTheme(e){
+  if (e) e.preventDefault();
+  if (Date.now() - lastFlip < 400) return;                 // touch fires both pointerup and click
+  lastFlip = Date.now();
+  const { t: sched, next } = scheduledTheme();
+  const cur = document.documentElement.dataset.theme, flip = cur === "dark" ? "light" : "dark";
+  if (flip === sched){ themeOverride = null; store.del("themeOverride"); }   // tapping back returns to the schedule
+  else { themeOverride = { theme: flip, until: next ? next.getTime() : Date.now() + 12*3600000 }; store.set("themeOverride", themeOverride); }
+  document.documentElement.dataset.theme = flip;
+  toast(themeOverride ? `${flip === "dark" ? "Dark" : "Light"} theme until ${fmtTime(new Date(themeOverride.until))}` : `Back to the ${flip} theme schedule`);
+}
+$("clockBox").addEventListener("pointerup", flipTheme);
+$("clockBox").addEventListener("click", flipTheme);
+$("clockBox").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") flipTheme(e); });
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+/* ---- clock + night dim ---- */
+let undimUntil = 0;
+function tick(){
+  const d = new Date();
+  let h = d.getHours(), m = String(d.getMinutes()).padStart(2,"0");
+  if (S.clock24h) $("clock").textContent = `${String(h).padStart(2,"0")}:${m}`;
+  else { const ap = h < 12 ? "am" : "pm"; h = h % 12 || 12; $("clock").innerHTML = `${h}:${m}<small>${ap}</small>`; }
+  $("date").textContent = d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  applyTheme();
+  const mins = d.getHours()*60 + d.getMinutes();
+  const toM = s => { const [a,b] = String(s).split(":").map(Number); return a*60+b; };
+  const f = toM(S.nightDim.from), t = toM(S.nightDim.to);
+  const night = S.nightDim.on && (f > t ? (mins >= f || mins < t) : (mins >= f && mins < t));
+  if (!undimUntil || Date.now() > undimUntil) document.body.classList.toggle("night", night);
+}
+$("dim").addEventListener("click", () => { undimUntil = Date.now() + 60000; document.body.classList.remove("night"); });
+
+/* ---- weather ---- */
+let wxLatest = null;
+async function loadWeather(){
+  try {
+    const [now, fnd, warn] = await Promise.all([
+      getJSON(`${HKO}?dataType=rhrread&lang=en`),
+      getJSON(`${HKO}?dataType=fnd&lang=en`),
+      getJSON(`${HKO}?dataType=warnsum&lang=en`)
+    ]);
+    wxLatest = { now, fnd, warn };
+    const temps = now.temperature?.data || [];
+    store.set("hkoStations", temps.map(x => x.place));
+    store.set("hkoDistricts", (now.rainfall?.data || []).map(x => x.place));
+    const W = S.weather;
+    const t = temps.find(x => x.place === W.station) || temps.find(x => x.place === "Hong Kong Observatory") || temps[0];
+    $("temp").textContent = t ? `${Math.round(t.value)}°` : "--°";
+    $("wxplace").textContent = !t ? "Hong Kong" : t.place === W.station ? (W.label || W.station) : t.place;
+    const rain = (now.rainfall?.data || []).find(x => x.place === W.rainDistrict);
+    const rainTxt = rain && Number(rain.max) > 0 ? `Raining, ${rain.max} mm in the last hour<br>` : "";
+    const hum = now.humidity?.data?.[0]?.value;
+    const uv = now.uvindex?.data?.[0];
+    let uvTxt = "";
+    if (uv && uv.value !== "" && uv.value != null){
+      const v = Number(uv.value), cls = v >= 8 ? "uv-vhi" : v >= 6 ? "uv-hi" : "";
+      uvTxt = `<span class="${cls}">UV ${v}${uv.desc ? " " + esc(uv.desc) : ""}</span>`;
+    }
+    const f = fnd.weatherForecast?.[0];
+    $("wxsub").innerHTML = rainTxt +
+      [hum != null ? `Humidity ${hum}%` : "", uvTxt].filter(Boolean).join(", ") +
+      (f ? `<br>${f.week.slice(0,3)} ${f.forecastMintemp.value}–${f.forecastMaxtemp.value}°, rain ${esc(f.PSR.toLowerCase())}` : "");
+    const icon = now.icon?.[0];
+    if (icon){ $("wxicon").src = `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${icon}.png`; $("wxicon").hidden = false; }
+
+    const w = Object.values(warn || {}).filter(x => x && x.actionCode !== "CANCEL");
+    const label = x => {
+      const c = x.code || "";
+      if (/^TC\d/.test(c)) return `Typhoon signal No. ${c.slice(2).replace(/(\d+)(\D*)/, "$1 $2").trim()}`;
+      return ({ WRAINA:"Amber rainstorm", WRAINR:"Red rainstorm", WRAINB:"Black rainstorm",
+                WHOT:"Very hot weather warning", WCOLD:"Cold weather warning" })[c] || x.name || c;
+    };
+    const severe = x => /^(TC(8|9|10)|WRAINR|WRAINB)/.test(x.code || "");
+    $("warns").innerHTML = w.map(x => `<div class="warn ${severe(x) ? "red" : ""}">${esc(label(x))}</div>`).join("");
+  } catch {
+    $("wxsub").textContent = "Weather unavailable. Retrying soon.";
+  }
+}
+
+/* ---- transit data: Citybus + KMB ---- */
+const KMB = "https://data.etabus.gov.hk/v1/transport/kmb";
+const stopKey = r => r.stopId || norm(r.stop);
+const stopLabel = r => (r.stopName || r.stop || "").split(",")[0].trim();
+const tidy = s => { s = String(s || "").replace(/\s*\([A-Z]{1,3}\d{2,4}\)\s*$/, "").trim();
+  return s === s.toUpperCase() ? s.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()).replace(/\bMtr\b/g, "MTR") : s; };
+const dist = (a, b) => { const k = Math.PI/180, x = (b.lon - a.lon)*k*Math.cos((a.lat + b.lat)*k/2), y = (b.lat - a.lat)*k; return Math.sqrt(x*x + y*y)*6371000; };
+
+const stopInfo = store.get("stopInfo") || {};
+let stopInfoDirty = false;
+async function stopOf(op, id){
+  const k = op + ":" + id;
+  if (stopInfo[k]) return stopInfo[k];
+  const j = await getJSON(op === "KMB" ? `${KMB}/stop/${id}` : `${CTB}/stop/${id}`);
+  const d = j.data || {};
+  stopInfoDirty = true;
+  return (stopInfo[k] = { name: tidy(d.name_en), lat: +d.lat, lon: +d.long });
+}
+const saveStops = () => { if (stopInfoDirty){ store.set("stopInfo", stopInfo); stopInfoDirty = false; } };
+async function pool(items, n, fn){
+  const out = []; let i = 0;
+  await Promise.all(Array.from({length:n}, async () => { while (i < items.length){ const k = i++; out[k] = await fn(items[k]); } }));
+  return out;
+}
+
+// Every route from both operators. Same number on both with matching ends = jointly run.
+let routesMemo = null;
+async function allRoutes(){
+  if (routesMemo) return routesMemo;
+  const c = store.get("routes2");
+  if (c && Date.now() - c.at < 7*86400000) return (routesMemo = c.list);
+  const [ctb, kmb] = await Promise.allSettled([getJSON(`${CTB}/route/CTB`), getJSON(`${KMB}/route/`)]);
+  const C = {}, K = {};
+  if (ctb.status === "fulfilled") for (const r of ctb.value.data || []) C[r.route] = { orig: r.orig_en, dest: r.dest_en };
+  if (kmb.status === "fulfilled") for (const r of kmb.value.data || []){
+    if (String(r.service_type) !== "1") continue;
+    const e = K[r.route] ||= {};
+    e[r.bound === "I" ? "inbound" : "outbound"] = tidy(r.dest_en);
+    if (r.bound === "O") e.orig = tidy(r.orig_en);
+  }
+  if (!Object.keys(C).length && !Object.keys(K).length) throw new Error("no routes");
+  const first = s => norm(s).split(" ")[0];
+  const joint = n => { const c = C[n], k = K[n]; if (!c || !k) return false;
+    const a = [c.orig, c.dest].map(first), b = [k.orig, k.outbound, k.inbound].filter(Boolean).map(first);
+    return a.some(x => b.includes(x)); };
+  const list = [];
+  for (const n of new Set([...Object.keys(C), ...Object.keys(K)])){
+    if (joint(n)) list.push({ key: "JOINT|" + n, op: "JOINT", route: n, label: n + " (Citybus and KMB)",
+      dirs: { outbound: C[n].dest, inbound: C[n].orig } });
+    else {
+      if (C[n]) list.push({ key: "CTB|" + n, op: "CTB", route: n, label: n + " (Citybus)", dirs: { outbound: C[n].dest, inbound: C[n].orig } });
+      if (K[n]) list.push({ key: "KMB|" + n, op: "KMB", route: n, label: n + " (KMB)", dirs: { outbound: K[n].outbound, inbound: K[n].inbound } });
+    }
+  }
+  list.sort((a,b) => a.route.localeCompare(b.route, "en", { numeric: true }) || a.op.localeCompare(b.op));
+  store.set("routes2", { at: Date.now(), list });
+  return (routesMemo = list);
+}
+
+// Stops along one direction of a route, with names and positions
+const dirMemo = {};
+async function dirStops(op, route, dir){
+  const k = `${op}|${route}|${dir}`;
+  if (dirMemo[k]) return dirMemo[k];
+  let ids = (store.get("rs:" + k) || {}).ids;
+  if (!ids){
+    let list = [];
+    try { list = (await getJSON(op === "KMB" ? `${KMB}/route-stop/${encodeURIComponent(route)}/${dir}/1`
+                                            : `${CTB}/route-stop/CTB/${encodeURIComponent(route)}/${dir}`)).data || []; } catch {}
+    ids = list.sort((a,b) => +a.seq - +b.seq).map(x => x.stop);
+    if (ids.length) store.set("rs:" + k, { ids });
+  }
+  const info = await pool(ids, 6, id => stopOf(op, id).catch(() => ({ name: "", lat: 0, lon: 0 })));
+  saveStops();
+  return (dirMemo[k] = ids.map((id, i) => ({ id, ...info[i] })));
+}
+
+// For a jointly run route picked on the Citybus side, find the same stop on KMB's side
+async function kmbTwin(r){
+  const key = `twin:${r.route}|${r.dir}|${r.stopId}`;
+  const c = store.get(key); if (c) return c.none ? null : c;
+  const cl = await dirStops("CTB", r.route, r.dir);
+  const me = cl.find(x => x.id === r.stopId), end = cl[cl.length - 1];
+  if (!me || !end) return null;
+  let best = null;
+  for (const dir of ["outbound","inbound"]){
+    const kl = await dirStops("KMB", r.route, dir);
+    if (!kl.length) continue;
+    const endGap = dist(kl[kl.length - 1], end);
+    const near = kl.reduce((m, x) => { const d = dist(x, me); return d < m.d ? { x, d } : m; }, { x: null, d: Infinity });
+    if (near.x && near.d < 150 && (!best || endGap < best.endGap)) best = { stopId: near.x.id, dir, endGap };
+  }
+  store.set(key, best || { none: true });
+  return best;
+}
+
+/* ---- bus panels ---- */
+function buildPanels(){
+  const main = $("main"), side = main.querySelector(".side");
+  main.querySelectorAll(".bus").forEach(n => n.remove());
+  S.panels.slice(0, MAX_PANELS).forEach((p, i) => {
+    const routes = (p.routes || []).filter(r => r.route);
+    const stops = [...new Set(routes.map(stopKey))];
+    const sec = document.createElement("section");
+    sec.className = "col bus"; sec.id = "panel-" + i;
+    sec.innerHTML = `<h2>${esc(p.title || "Buses")}</h2>` +
+      (stops.length === 1 ? `<div class="where">${esc(stopLabel(routes[0]))}</div>` : "") +
+      `<div class="rows"><div class="msg">${routes.length ? "Finding bus stops…" : "Add routes to this panel in Settings."}</div></div>`;
+    main.insertBefore(sec, side);
+  });
+}
+
+// Older settings stored a typed stop name instead of a stop ID
+const resolved = {};
+async function resolveTyped(route, stop){
+  const key = `ctbStop:${route}@${norm(stop)}`;
+  if (resolved[key]) return resolved[key];
+  const cached = store.get(key); if (cached && cached.length) return (resolved[key] = cached);
+  const want = norm(stop), found = [];
+  for (const dir of ["inbound","outbound"])
+    for (const x of await dirStops("CTB", route, dir)) if (want && norm(x.name).includes(want)) found.push({ stop: x.id, dir: dir[0].toUpperCase() });
+  if (found.length) store.set(key, found);
+  return (resolved[key] = found);
+}
+
+async function etasFor(r){
+  const route = r.route.toUpperCase(), out = [];
+  let routes = []; try { routes = await allRoutes(); } catch {}
+  const op = r.op || (routes.some(x => x.key === "JOINT|" + route) ? "JOINT" : "CTB");
+  const pull = async (url, dirLetter) => {
+    try { const j = await getJSON(url); out.push(...(j.data || []).filter(e => e.dir === dirLetter && (e.service_type == null || String(e.service_type) === "1"))); } catch {}
+  };
+  if (!r.stopId){                                              // typed stop name (older settings)
+    const stops = await resolveTyped(route, r.stop);
+    for (const s of stops) await pull(`${CTB}/eta/CTB/${s.stop}/${encodeURIComponent(route)}`, s.dir);
+    const dw = words(r.to);
+    const right = out.filter(e => dw.some(w => norm(e.dest_en).includes(w)));
+    return { found: stops.length > 0, etas: dw.length && right.length ? right : out };
+  }
+  const L = d => d === "inbound" ? "I" : "O";
+  if (op === "KMB") await pull(`${KMB}/eta/${r.stopId}/${encodeURIComponent(route)}/1`, L(r.dir));
+  else await pull(`${CTB}/eta/CTB/${r.stopId}/${encodeURIComponent(route)}`, L(r.dir));
+  if (op === "JOINT"){
+    const t = await kmbTwin({ ...r, route });
+    if (t) await pull(`${KMB}/eta/${t.stopId}/${encodeURIComponent(route)}/1`, L(t.dir));
+  }
+  return { found: true, etas: out };
+}
+
+async function loadBuses(){
+  for (const [i, p] of S.panels.slice(0, MAX_PANELS).entries()){
+    const box = $("panel-" + i)?.querySelector(".rows");
+    const routes = (p.routes || []).filter(r => r.route);
+    if (!box || !routes.length) continue;
+    const mixed = new Set(routes.map(stopKey)).size > 1;
+    try {
+      const rows = [];
+      for (const r of routes){
+        const { found, etas } = await etasFor(r);
+        const now = Date.now();
+        const list = etas.filter(e => e.eta).map(e => ({ m: Math.max(0, Math.round((new Date(e.eta) - now)/60000)), dest: tidy(e.dest_en) }))
+          .sort((a,b) => a.m - b.m).filter((e,k,a) => k === 0 || e.m !== a[k-1].m).slice(0,2);
+        const note = etas.find(e => !e.eta)?.rmk_en;
+        const from = mixed ? esc(stopLabel(r)) + " to " : "to ";
+        rows.push(`<div class="row"><div class="plate">${esc(r.route.toUpperCase())}</div><div>` +
+          (!found ? `<div class="msg">Stop not found. Pick the stop again in Settings.</div>` :
+           !list.length ? `<div class="msg">${esc(note || "No buses scheduled right now")}</div>` :
+           `<div class="etas">${list.map((e,k) => `<span class="n ${k ? "" : "next"}">${e.m === 0 ? "Now" : e.m + '<span class="u">min</span>'}</span>`).join("")}</div>
+            <div class="dest">${from}${esc(list[0].dest || "")}</div>`) +
+          `</div></div>`);
+      }
+      box.innerHTML = rows.join("");
+      box.classList.toggle("dense", rows.length > 2);
+    } catch {
+      box.innerHTML = `<div class="msg">Bus times unavailable. Check the Wi-Fi connection.</div>`;
+    }
+  }
+  $("updated").textContent = "Buses updated " + new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+}
+
+/* ---- weather details: big icons for reading from across the room ---- */
+const hkoIcon = c => `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${c}.png`;
+const PSR_LEVEL = { "low": 1, "medium low": 2, "medium": 3, "medium high": 4, "high": 5 };
+const rainBar = psr => { const n = PSR_LEVEL[String(psr || "").toLowerCase()] || 0;
+  return `<span class="rainbar" role="img" aria-label="Chance of rain: ${esc(psr || "unknown")}">${[1,2,3,4,5].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>`; };
+const dayName = ymd => {
+  const d = new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}T12:00:00+08:00`);
+  const tmr = new Date(Date.now() + 8*3600000 + 86400000).toISOString().slice(0,10).replace(/-/g,"");
+  return ymd === tmr ? "Tomorrow" : d.toLocaleDateString("en-GB", { weekday: "short", timeZone: "Asia/Hong_Kong" });
+};
+async function openWeather(){
+  $("wxOverlay").classList.add("open");
+  if (!wxLatest) { $("wxBody").innerHTML = `<div class="msg">Loading the forecast…</div>`; await loadWeather(); }
+  if (!wxLatest){ $("wxBody").innerHTML = `<div class="msg">The forecast isn't available right now. Check the Wi-Fi connection.</div>`; return; }
+  const { now, fnd } = wxLatest, W = S.weather;
+  const temps = now.temperature?.data || [];
+  const t = temps.find(x => x.place === W.station) || temps.find(x => x.place === "Hong Kong Observatory") || temps[0];
+  const place = !t ? "Hong Kong" : t.place === W.station ? (W.label || W.station) : t.place;
+  const hum = now.humidity?.data?.[0]?.value, uv = now.uvindex?.data?.[0], sun = sunTimes(new Date());
+  const uvCls = uv && uv.value !== "" ? (+uv.value >= 8 ? "uv-vhi" : +uv.value >= 6 ? "uv-hi" : "") : "";
+  const days = fnd?.weatherForecast || [];
+  const [f0, ...rest] = days;
+
+  const nowCard = `<div class="wx-card">
+      <div class="lbl">${esc(place)} now</div>
+      <div class="hero">${now.icon?.[0] ? `<img src="${hkoIcon(now.icon[0])}" alt="">` : ""}<div class="big">${t ? Math.round(t.value) + "°" : "--°"}</div></div>
+      <div class="stats">
+        ${hum != null ? `<div><span>Humidity</span> ${hum}%</div>` : ""}
+        ${uv && uv.value !== "" ? `<div class="${uvCls}"><span>UV</span> ${esc(uv.value)}</div>` : ""}
+        <div><span>Sunrise</span> ${fmtTime(sun.rise)}</div><div><span>Sunset</span> ${fmtTime(sun.set)}</div>
+      </div>
+      <div class="chips">${$("warns").innerHTML}</div>
+    </div>`;
+  const tmrCard = f0 ? `<div class="wx-card">
+      <div class="lbl">${dayName(f0.forecastDate)}</div>
+      <div class="hero tmr2"><img src="${hkoIcon(f0.ForecastIcon)}" alt="${esc(f0.forecastWeather)}">
+        <div><span class="big">${f0.forecastMaxtemp.value}°</span><span class="lo">${f0.forecastMintemp.value}°</span></div></div>
+      <div class="rainrow">Rain ${rainBar(f0.PSR)}</div>
+    </div>` : `<div class="wx-card"><div class="msg">No forecast right now.</div></div>`;
+  const strip = rest.slice(0, 8).map(f => `<div class="day">
+      <b>${dayName(f.forecastDate)}</b>
+      <img src="${hkoIcon(f.ForecastIcon)}" alt="${esc(f.forecastWeather)}">
+      <div><div class="hi">${f.forecastMaxtemp.value}°</div><div class="lo2">${f.forecastMintemp.value}°</div></div>
+      ${rainBar(f.PSR)}
+    </div>`).join("");
+
+  $("wxBody").innerHTML = `<div class="wx-top">${nowCard}${tmrCard}</div><div class="days8">${strip}</div>`;
+}
+$("wxBox").addEventListener("click", openWeather);
+$("wxBox").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openWeather(); } });
+$("wxClose").onclick = () => $("wxOverlay").classList.remove("open");
+
+/* ---- public holidays (gazetted list, refreshed from the government's 1823 feed when it's reachable) ---- */
+const HOLIDAYS_BUILTIN = [
+  ["2026-09-26","The day following the Chinese Mid-Autumn Festival"],["2026-10-01","National Day"],
+  ["2026-10-19","The day following Chung Yeung Festival"],["2026-12-25","Christmas Day"],["2026-12-26","The first weekday after Christmas Day"],
+  ["2027-01-01","The first day of January"],["2027-02-06","Lunar New Year's Day"],["2027-02-08","The third day of Lunar New Year"],
+  ["2027-02-09","The fourth day of Lunar New Year"],["2027-03-26","Good Friday"],["2027-03-27","The day following Good Friday"],
+  ["2027-03-29","Easter Monday"],["2027-04-05","Ching Ming Festival"],["2027-05-01","Labour Day"],["2027-05-13","The Birthday of the Buddha"],
+  ["2027-06-09","Tuen Ng Festival"],["2027-07-01","Hong Kong Special Administrative Region Establishment Day"],
+  ["2027-09-16","The day following the Chinese Mid-Autumn Festival"],["2027-10-01","National Day"],["2027-10-08","Chung Yeung Festival"],
+  ["2027-12-25","Christmas Day"],["2027-12-27","The first weekday after Christmas Day"]
+];
+const shortHoliday = n => String(n)
+  .replace(/^The day following the Chinese Mid-Autumn Festival$/i, "Day after Mid-Autumn")
+  .replace(/^The (second )?day following (the )?/i, (m, a) => (a ? "2nd day after " : "Day after "))
+  .replace(/^The first weekday after Christmas Day$/i, "Day after Christmas")
+  .replace(/^The second weekday after Christmas Day$/i, "2nd weekday after Christmas")
+  .replace(/^Hong Kong Special Administrative Region Establishment Day$/i, "HKSAR Establishment Day")
+  .replace(/^The first day of January$/i, "New Year's Day")
+  .replace(/^The (second|third|fourth) day of (the )?Lunar New Year$/i, (m, d) => `Lunar New Year, day ${ {second:2, third:3, fourth:4}[d.toLowerCase()] }`)
+  .replace(/^The Birthday of the Buddha$/i, "Buddha's Birthday")
+  .replace(/^The day after /i, "Day after ")
+  .replace(/Chinese /, "");
+let holidays = store.get("holidays") || HOLIDAYS_BUILTIN;
+async function refreshHolidays(){
+  try {
+    const j = await getJSON("https://www.1823.gov.hk/common/ical/en.json");
+    const ev = j?.vcalendar?.[0]?.vevent || [];
+    const list = ev.map(e => { const d = String(Array.isArray(e.dtstart) ? e.dtstart[0] : e.dtstart);
+      return [`${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`, e.summary]; }).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x[0]) && x[1]);
+    if (list.length > 5){ holidays = list.sort((a,b) => a[0].localeCompare(b[0])); store.set("holidays", holidays); }
+  } catch {}                                    // the built-in list covers the rest of 2026 and all of 2027
+  renderHoliday();
+}
+const hkToday = () => new Date(Date.now() + 8*3600000).toISOString().slice(0,10);
+function renderHoliday(){
+  const today = hkToday();
+  const next = holidays.find(h => h[0] >= today);
+  const box = $("holiday");
+  if (!next){ box.innerHTML = ""; return; }
+  const days = Math.round((Date.parse(next[0]) - Date.parse(today)) / 86400000);
+  const d = new Date(next[0] + "T12:00:00+08:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Hong_Kong" });
+  box.classList.toggle("today", days === 0);
+  box.innerHTML = days === 0
+    ? `<div class="k">Public holiday today</div><div class="n">${esc(shortHoliday(next[1]))}</div>`
+    : `<div class="k">Next public holiday</div><div class="n">${esc(shortHoliday(next[1]))}</div>
+       <div class="d">${d}, <b>${days === 1 ? "tomorrow" : "in " + days + " days"}</b></div>`;
+}
+
+/* ---- public holiday list ---- */
+function openHolidays(){
+  const today = hkToday(), set = new Set(holidays.map(h => h[0]));
+  const dayMs = 86400000, iso = t => new Date(t).toISOString().slice(0,10);
+  const off = ds => { const w = new Date(ds + "T12:00:00Z").getUTCDay(); return w === 0 || w === 6 || set.has(ds); };
+  const breakLen = ds => {                         // consecutive days off (weekends + holidays) around this date
+    let a = Date.parse(ds), b = a;
+    while (off(iso(a - dayMs))) a -= dayMs;
+    while (off(iso(b + dayMs))) b += dayMs;
+    return Math.round((b - a) / dayMs) + 1;
+  };
+  const up = holidays.filter(h => h[0] >= today);
+  let html = "", year = "";
+  up.forEach((h, i) => {
+    const y = h[0].slice(0,4);
+    if (y !== year){ year = y; html += `<div class="hol-year">${y}</div>`; }
+    const d = new Date(h[0] + "T12:00:00+08:00"), fmt = o => d.toLocaleDateString("en-GB", { ...o, timeZone: "Asia/Hong_Kong" });
+    const days = Math.round((Date.parse(h[0]) - Date.parse(today)) / dayMs);
+    const len = breakLen(h[0]);
+    const when = days === 0 ? "Today" : days === 1 ? "Tomorrow" : days < 60 ? `in ${days} days` : "";
+    html += `<div class="hday ${i === 0 ? "next" : ""}">
+      <div class="cal"><b>${fmt({ day: "numeric" })}</b><small>${fmt({ month: "short" })}</small></div>
+      <div><div class="nm" title="${esc(h[1])}">${esc(shortHoliday(h[1]))}</div><div class="wd">${fmt({ weekday: "long" })}</div></div>
+      ${len >= 3 ? `<span class="brk">${len}-day break</span>` : `<span class="when">${when}</span>`}
+    </div>`;
+  });
+  $("holBody").innerHTML = html || `<div class="msg">No upcoming holidays on file. The list updates when the government publishes the next year's holidays.</div>`;
+  $("holOverlay").classList.add("open");
+}
+$("holiday").addEventListener("click", openHolidays);
+$("holiday").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openHolidays(); } });
+$("holClose").onclick = () => $("holOverlay").classList.remove("open");
+
+/* ---- MTR ---- */
+const MTR_NAMES = { KET:"Kennedy Town", CHW:"Chai Wan", ADM:"Admiralty", LOW:"Lo Wu", LMC:"Lok Ma Chau",
+  SHS:"Sheung Shui", FAN:"Fanling", TAP:"Tai Po Market", TAW:"Tai Wai", HUH:"Hung Hom", NOP:"North Point",
+  CAB:"Causeway Bay", HFC:"Heng Fa Chuen", SKW:"Shau Kei Wan", SHW:"Sheung Wan", CEN:"Central" };
+async function loadMTR(){
+  const out = [];
+  for (const st of MTR_STATIONS){
+    try {
+      const j = await getJSON(`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=${st.line}&sta=${st.sta}`);
+      const d = j.data?.[`${st.line}-${st.sta}`];
+      out.push(`<div class="stn">${st.name}${j.isdelay === "Y" ? ' <span class="delay">Delays</span>' : ""}</div>`);
+      if (!d){ out.push(`<div class="msg">${esc(j.message || "No train data right now")}</div>`); continue; }
+      for (const dir of ["DOWN","UP"]){
+        const trains = (d[dir] || []).filter(t => t.valid !== "N").slice(0,2);
+        if (!trains.length) continue;
+        const dest = MTR_NAMES[trains[0].dest] || trains[0].dest;
+        const mins = trains.map((t,k) => `<span class="${k ? "rest" : "first"}">${Number(t.ttnt) <= 0 ? "Now" : Number(t.ttnt)}</span>`).join(" ");
+        out.push(`<div class="tr"><span class="bar" style="background:${st.color}"></span><span class="to">to ${esc(dest)}</span><span class="t">${mins} <span class="rest">min</span></span></div>`);
+      }
+    } catch {
+      out.push(`<div class="stn">${st.name}</div><div class="msg">Train times unavailable</div>`);
+    }
+  }
+  $("mtr-rows").innerHTML = out.join("");
+}
+
+/* ---- calendar ---- */
+const calUrl = (mode, nav) => "https://calendar.google.com/calendar/embed?" + new URLSearchParams({
+  src: S.calendarId, mode, ctz: "Asia/Hong_Kong", showTitle: 0, showPrint: 0, showTabs: 0, showCalendars: 0, showTz: 0,
+  showNav: nav ? 1 : 0, showDate: nav ? 1 : 0 });
+function loadCalendar(){
+  const box = $("calbox");
+  box.querySelectorAll("iframe,.msg").forEach(n => n.remove());
+  $("btn-cal").hidden = !S.calendarId;
+  if (!S.calendarId){ box.insertAdjacentHTML("beforeend", `<div class="msg">Add your Google email in Settings to show today's events.</div>`); return; }
+  const f = document.createElement("iframe");
+  f.className = "calframe"; f.title = "Today's calendar"; f.src = calUrl("AGENDA", false);
+  box.appendChild(f);
+}
+function setCalMode(mode){
+  $("calModes").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
+  $("calFull").src = calUrl(mode, true);
+}
+$("btn-cal").onclick = () => { $("calOverlay").classList.add("open"); setCalMode("AGENDA"); };
+$("calModes").onclick = e => { const m = e.target.closest("button")?.dataset.mode; if (m) setCalMode(m); };
+$("calClose").onclick = () => { $("calOverlay").classList.remove("open"); $("calFull").src = "about:blank"; };
+
+/* ---- settings ---- */
+function opts(list, cur){
+  const all = [...new Set([cur, ...list].filter(Boolean))];
+  return all.map(v => `<option ${v === cur ? "selected" : ""}>${esc(v)}</option>`).join("");
+}
+function renderSettings(src){
+  const stations = store.get("hkoStations") || ["Happy Valley","Hong Kong Observatory","Hong Kong Park","King's Park"];
+  const districts = store.get("hkoDistricts") || ["Wan Chai"];
+  const panels = Array.from({length: MAX_PANELS}, (_, i) => src.panels[i] || { title: "", routes: [] });
+  $("setBody").innerHTML = `
+  <section>
+    <h3>Display</h3>
+    <p class="hint">Sunrise and sunset in Hong Kong today: ${fmtTime(sunTimes(new Date()).rise)} and ${fmtTime(sunTimes(new Date()).set)}. Tap the clock on the dashboard to switch light or dark until the next change.</p>
+    <div class="fields">
+      <label class="field">Theme
+        <select id="s-theme">
+          <option value="dark" ${src.theme==="dark"?"selected":""}>Always dark</option>
+          <option value="light" ${src.theme==="light"?"selected":""}>Always light</option>
+          <option value="sun" ${src.theme==="sun"?"selected":""}>Sunrise and sunset</option>
+          <option value="custom" ${src.theme==="custom"?"selected":""}>Custom times</option>
+        </select></label>
+      <label class="field">Light from (custom)<input type="time" id="s-light" value="${esc(src.themeCustom.light)}"></label>
+      <label class="field">Dark from (custom)<input type="time" id="s-dark" value="${esc(src.themeCustom.dark)}"></label>
+      <label class="field">Clock
+        <select id="s-clock"><option value="12" ${!src.clock24h?"selected":""}>12-hour</option><option value="24" ${src.clock24h?"selected":""}>24-hour</option></select></label>
+      <label class="field check"><input type="checkbox" id="s-dim" ${src.nightDim.on?"checked":""}> Dim the screen at night</label>
+      <label class="field">Dim from<input type="time" id="s-dimfrom" value="${esc(src.nightDim.from)}"></label>
+      <label class="field">Dim until<input type="time" id="s-dimto" value="${esc(src.nightDim.to)}"></label>
+    </div>
+  </section>
+  <section>
+    <h3>Weather</h3>
+    <p class="hint">Temperature comes from the Hong Kong Observatory station you pick. The name shown is what appears on screen, so you can call Happy Valley "Wan Chai", for example.</p>
+    <div class="fields">
+      <label class="field">Temperature station<select id="s-station">${opts(stations, src.weather.station)}</select></label>
+      <label class="field">Name shown<input id="s-label" value="${esc(src.weather.label)}" placeholder="Same as station"></label>
+      <label class="field">Rainfall district<select id="s-rain">${opts(districts, src.weather.rainDistrict)}</select></label>
+    </div>
+  </section>
+  <section>
+    <h3>Calendar</h3>
+    <div class="fields"><label class="field">Google account email<input id="s-cal" type="email" value="${esc(src.calendarId)}" placeholder="name@gmail.com"></label></div>
+  </section>
+  <section>
+    <h3>Bus panels</h3>
+    <p class="hint">Pick a route, then which way it's going, then your stop. Routes come from both Citybus and KMB. For routes they run together, the dashboard shows both companies' buses. Choose "None" to remove a route.</p>
+    ${panels.map((p, i) => `
+      <div class="panel-set">
+        <label class="field">Panel ${i+1} title<input id="s-p${i}-title" value="${esc(p.title)}" placeholder="e.g. To Central"></label>
+        <div class="rt rt-head"><span>Route</span><span>Direction</span><span>Stop</span></div>
+        ${Array.from({length: MAX_ROUTES}, (_, k) => `
+        <div class="rt" id="s-p${i}-row${k}">
+          <select class="r-route" aria-label="Panel ${i+1} route ${k+1}"></select>
+          <select class="r-dir" aria-label="Panel ${i+1} direction ${k+1}" disabled></select>
+          <select class="r-stop" aria-label="Panel ${i+1} stop ${k+1}" disabled></select>
+        </div>`).join("")}
+      </div>`).join("")}
+    <div class="set-status" id="s-status"></div>
+  </section>`;
+}
+function readSettings(){
+  const v = id => $(id).value.trim();
+  return {
+    calendarId: v("s-cal"),
+    clock24h: v("s-clock") === "24",
+    theme: v("s-theme"),
+    themeCustom: { light: v("s-light") || "07:00", dark: v("s-dark") || "19:00" },
+    nightDim: { on: $("s-dim").checked, from: v("s-dimfrom") || "23:30", to: v("s-dimto") || "06:30" },
+    weather: { station: v("s-station"), label: v("s-label"), rainDistrict: v("s-rain") },
+    panels: Array.from({length: MAX_PANELS}, (_, i) => ({
+      title: v(`s-p${i}-title`),
+      routes: Array.from({length: MAX_ROUTES}, (_, k) => readRow($(`s-p${i}-row${k}`))).filter(Boolean)
+    })).filter(p => p.title || p.routes.length)
+  };
+}
+/* ---- route / direction / stop dropdowns ---- */
+let pendingRows = 0;
+function status(){ $("s-status").textContent = pendingRows ? "Loading bus stops…" : ""; }
+async function fillRouteRows(src){
+  let routes = [];
+  try { routes = await allRoutes(); }
+  catch { $("s-status").textContent = "Couldn't load the bus route lists. Check the Wi-Fi connection."; }
+  const byKey = Object.fromEntries(routes.map(r => [r.key, r]));
+  const opts = routes.map(x => `<option value="${esc(x.key)}">${esc(x.label)}</option>`).join("");
+  for (let i = 0; i < MAX_PANELS; i++) for (let k = 0; k < MAX_ROUTES; k++){
+    const row = $(`s-p${i}-row${k}`), r = src.panels[i]?.routes?.[k];
+    const sel = row.querySelector(".r-route");
+    let key = "";
+    if (r){
+      const R = r.route.toUpperCase();
+      key = r.op ? `${r.op}|${R}` : (byKey["JOINT|" + R] ? "JOINT|" + R : "CTB|" + R);  // older rows used Citybus stops
+    }
+    sel.innerHTML = `<option value="">None</option>` + (key && !byKey[key] ? `<option value="${esc(key)}">${esc(r.route)}</option>` : "") + opts;
+    sel.value = key;
+    row._byKey = byKey;
+    sel.onchange = () => loadRow(row, null);
+    if (r) loadRow(row, r);
+  }
+}
+async function loadRow(row, want){
+  const key = row.querySelector(".r-route").value;
+  const dirSel = row.querySelector(".r-dir"), stopSel = row.querySelector(".r-stop");
+  dirSel.innerHTML = stopSel.innerHTML = ""; dirSel.disabled = stopSel.disabled = true;
+  row._stops = null;
+  if (!key) return;
+  const [op, route] = key.split("|"), src = op === "KMB" ? "KMB" : "CTB";
+  const inf = row._byKey[key] || { dirs: {} };
+  pendingRows++; status();
+  dirSel.innerHTML = `<option>Loading…</option>`;
+  try {
+    const stops = {};
+    for (const d of ["outbound","inbound"]){ const l = await dirStops(src, route, d); if (l.length) stops[d] = l; }
+    if (row.querySelector(".r-route").value !== key) return;
+    const dirs = Object.keys(stops);
+    if (!dirs.length){ dirSel.innerHTML = `<option value="">No stops found</option>`; return; }
+    row._stops = stops;
+    dirSel.innerHTML = dirs.map(d => `<option value="${d}">to ${esc(tidy(inf.dirs[d]) || stops[d][stops[d].length-1].name)}</option>`).join("");
+    let dir = want?.dir;
+    if (!dir && want?.stop){                                   // older typed-name settings
+      const w = norm(want.stop), dw = words(want.to);
+      const hasStop = d => stops[d].some(x => norm(x.name).includes(w));
+      const destOk = d => !dw.length || dw.some(x => norm(inf.dirs[d]).includes(x));
+      dir = dirs.find(d => hasStop(d) && destOk(d)) || dirs.find(hasStop);
+    }
+    dirSel.value = dirs.includes(dir) ? dir : dirs[0];
+    dirSel.disabled = false;
+    dirSel.onchange = () => fillStops(row, null);
+    fillStops(row, want);
+  } finally { pendingRows--; status(); }
+}
+function fillStops(row, want){
+  const dir = row.querySelector(".r-dir").value, stopSel = row.querySelector(".r-stop");
+  const list = row._stops?.[dir] || [];
+  stopSel.innerHTML = `<option value="">Choose a stop</option>` +
+    list.map((x, n) => `<option value="${esc(x.id)}">${n + 1}. ${esc(x.name)}</option>`).join("");
+  let id = want?.stopId && list.some(x => x.id === want.stopId) ? want.stopId : "";
+  if (!id && want?.stop){ const w = norm(want.stop); id = list.find(x => norm(x.name).includes(w))?.id || ""; }
+  stopSel.value = id;
+  stopSel.disabled = !list.length;
+}
+function readRow(row){
+  const key = row.querySelector(".r-route").value;
+  if (!key) return null;
+  const [op, route] = key.split("|");
+  const dir = row.querySelector(".r-dir").value, stopId = row.querySelector(".r-stop").value;
+  const st = (row._stops?.[dir] || []).find(x => x.id === stopId);
+  return { op, route, dir, stopId, stopName: st?.name || "" };
+}
+
+$("btn-settings").onclick = () => { renderSettings(S); fillRouteRows(S); $("setOverlay").classList.add("open"); };
+$("setCancel").onclick = () => $("setOverlay").classList.remove("open");
+$("setReset").onclick = () => { const d = clone(DEFAULTS); renderSettings(d); fillRouteRows(d); };
+$("setSave").onclick = () => {
+  if (pendingRows > 0){ alert("Still loading bus stops. Try again in a moment."); return; }
+  const incomplete = [...document.querySelectorAll(".rt[id]")].find(row => row.querySelector(".r-route").value && !row.querySelector(".r-stop").value);
+  if (incomplete){ alert(`Route ${incomplete.querySelector(".r-route").value} needs a direction and stop.`); return; }
+  const n = readSettings();
+  if (n.theme === "custom" && n.themeCustom.light >= n.themeCustom.dark){ alert("For custom times, light needs to start before dark."); return; }
+  store.set("dashSettings", n);
+  location.reload();
+};
+
+/* ---- app buttons (Fully Kiosk Browser) ---- */
+function openApp(pkg){
+  if (window.fully && fully.startApplication) fully.startApplication(pkg);
+  else location.href = `intent:#Intent;package=${pkg};end`;
+}
+$("btn-ac").onclick = () => openApp(APPS.aircon);
+$("btn-door").onclick = () => openApp(APPS.doorbell);
+$("btn-refresh").onclick = async () => {
+  const b = $("btn-refresh");
+  if (b.disabled) return;
+  b.disabled = true; b.textContent = "Refreshing…";
+  loadCalendar();
+  await Promise.allSettled([loadWeather(), loadBuses(), loadMTR()]);
+  b.textContent = "Refreshed";
+  setTimeout(() => { b.textContent = "Refresh"; b.disabled = false; }, 1500);
+};
+
+/* ---- start ---- */
+applyTheme(); buildPanels();
+tick(); setInterval(tick, 5000);
+loadWeather(); setInterval(loadWeather, 10*60000);
+loadBuses(); setInterval(loadBuses, 30000);
+loadMTR(); setInterval(loadMTR, 30000);
+renderHoliday(); refreshHolidays(); setInterval(refreshHolidays, 6*3600000); setInterval(renderHoliday, 60000);
+loadCalendar(); setInterval(loadCalendar, 30*60000);
+</script>
+</body>
+</html>

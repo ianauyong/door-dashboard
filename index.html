@@ -126,6 +126,18 @@ input,select{font:500 16px var(--font);color:var(--text);background:var(--field)
 .panel-set:first-of-type{border-top:0;margin-top:0;padding-top:0}
 .rt{display:grid;grid-template-columns:110px minmax(0,1.1fr) minmax(0,1.3fr);gap:8px;margin-top:6px}
 .rt-head{font-size:12px;color:var(--muted)}
+.pe-rt,#pe-rows .rt{grid-template-columns:minmax(150px,.9fr) minmax(0,1fr) minmax(0,1.3fr) 44px}
+.rt .rm{font:600 20px var(--font);color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:8px;min-height:40px}
+.rt .rm:active{background:var(--line)}
+.pe-actions{display:flex;align-items:center;gap:12px;margin-top:10px}
+.pe-note{margin-top:8px}
+.mtr-rt,#mtr-edit-rows .rt{grid-template-columns:minmax(150px,1fr) minmax(0,1fr) minmax(0,1.2fr) 44px}
+#mtrBox{cursor:pointer;touch-action:manipulation}
+#mtrBox:focus-visible{outline:3px solid var(--plate);outline-offset:2px}
+#mtrBox:active{filter:brightness(1.08)}
+.bus{cursor:pointer;touch-action:manipulation}
+.bus:focus-visible{outline:3px solid var(--plate);outline-offset:2px}
+.bus:active{filter:brightness(1.08)}
 .rt select:disabled{opacity:.55}
 .set-status{font-size:13px;color:var(--muted);margin-top:6px}
 #clockBox{cursor:pointer;touch-action:manipulation;border-radius:10px;padding:2px 6px 4px;margin:-2px -6px -4px}
@@ -163,6 +175,16 @@ input,select{font:500 16px var(--font);color:var(--text);background:var(--field)
 .rainrow .rainbar{margin-top:0}
 .rainrow .rainbar i{width:16px;height:9px}
 @media (orientation:portrait){ .wx-top{grid-template-columns:1fr} .days8{grid-template-columns:repeat(4,minmax(0,1fr))} .wx-body{grid-template-rows:auto auto;overflow:auto} }
+#saver{position:fixed;inset:0;z-index:18;background:#000;color:#F4F6F8;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 1.2s;touch-action:manipulation;cursor:pointer}
+#saver[hidden]{display:none}
+#saver.on{opacity:1}
+.sv-inner{position:relative;text-align:center;transition:transform 2s ease}
+.sv-time{font-family:var(--display);font-weight:600;font-size:clamp(120px,34vh,300px);line-height:.85;letter-spacing:-.01em;font-variant-numeric:tabular-nums;text-shadow:0 2px 24px rgba(0,0,0,.35)}
+.sv-time small{font-size:.3em;font-weight:500;opacity:.7;margin-left:6px}
+.sv-date{font-size:clamp(22px,4.5vh,38px);font-weight:500;opacity:.8;margin-top:14px}
+.sv-wx{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--display);font-size:clamp(28px,6vh,48px);font-weight:600;opacity:.85;margin-top:10px}
+.sv-wx img{width:clamp(40px,8vh,64px);height:clamp(40px,8vh,64px)}
+@media (prefers-reduced-motion:reduce){#saver,.sv-inner{transition:none}}
 #dim{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity 1.5s;z-index:20}
 body.night #dim{opacity:.65;pointer-events:auto}
 
@@ -231,6 +253,44 @@ body.night #dim{opacity:.65;pointer-events:auto}
   <iframe id="calFull" class="calframe" title="Calendar"></iframe>
 </div>
 
+<!-- Edit one bus panel -->
+<div class="overlay" id="peOverlay" role="dialog" aria-label="Edit bus panel">
+  <div class="ov-head">
+    <h2>Edit panel</h2>
+    <button class="btn" id="peCancel">Cancel</button>
+    <button class="btn primary" id="peSave">Save</button>
+  </div>
+  <div class="set-body">
+    <section>
+      <label class="field">Panel title<input id="pe-title" placeholder="e.g. To Central"></label>
+      <div class="rt rt-head pe-rt"><span>Route</span><span>Direction</span><span>Stop</span><span></span></div>
+      <div id="pe-rows"></div>
+      <div class="pe-actions">
+        <button class="btn" id="peAdd">Add a route</button>
+        <span class="set-status" id="pe-status"></span>
+      </div>
+      <p class="hint pe-note">Each panel fits up to 3 routes. Tap × to remove one.</p>
+    </section>
+  </div>
+</div>
+
+<!-- Edit MTR stations -->
+<div class="overlay" id="mtrOverlay" role="dialog" aria-label="Edit MTR stations">
+  <div class="ov-head">
+    <h2>MTR stations</h2>
+    <button class="btn" id="mtrCancel">Cancel</button>
+    <button class="btn primary" id="mtrSave">Save</button>
+  </div>
+  <div class="set-body">
+    <section>
+      <div class="rt rt-head mtr-rt"><span>Line</span><span>Station</span><span>Show</span><span></span></div>
+      <div id="mtr-edit-rows"></div>
+      <div class="pe-actions"><button class="btn" id="mtrAdd">Add a station</button></div>
+      <p class="hint pe-note">Up to 3 stations fit in the panel. Showing one direction takes less space than both. For a station on two lines, like Admiralty, add it once for each line.</p>
+    </section>
+  </div>
+</div>
+
 <!-- Public holidays -->
 <div class="overlay" id="holOverlay" role="dialog" aria-label="Public holidays">
   <div class="ov-head">
@@ -260,6 +320,13 @@ body.night #dim{opacity:.65;pointer-events:auto}
   <div class="set-body" id="setBody"></div>
 </div>
 
+<div id="saver" role="button" aria-label="Clock screensaver. Tap to return to the dashboard" hidden>
+  <div class="sv-inner" id="svInner">
+    <div class="sv-time" id="svTime"></div>
+    <div class="sv-date" id="svDate"></div>
+    <div class="sv-wx" id="svWx"></div>
+  </div>
+</div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="dim"></div>
 
@@ -271,7 +338,9 @@ const DEFAULTS = {
   theme: "sun",                                    // dark | light | sun (sunrise/sunset) | custom
   themeCustom: { light: "07:00", dark: "19:00" },
   nightDim: { on: true, from: "23:30", to: "06:30" },
+  saver: { on: true, minutes: 10 },       // clock screensaver after this many idle minutes
   weather: { station: "Happy Valley", label: "Wan Chai", rainDistrict: "Wan Chai" },
+  mtr: [ { line: "ISL", sta: "WAC", dir: "both" }, { line: "EAL", sta: "EXC", dir: "both" } ],
   panels: [
     { title: "To Central", routes: [
       { route: "90",  stop: "Hennessy Rd Govt Primary Sch", to: "Central, Exchange Square, Admiralty, Sheung Wan" },
@@ -288,10 +357,33 @@ const DEFAULTS = {
       { route: "101", stop: "Bullock Lane", to: "Kennedy Town" } ] }
   ]
 };
-const MTR_STATIONS = [
-  { line: "ISL", sta: "WAC", name: "Wan Chai", color: "#0075C2" },
-  { line: "EAL", sta: "EXC", name: "Exhibition Centre", color: "#5EB7E8" }
-];
+const MTR_LINES = {
+  ISL: { name: "Island Line", color: "#0075C2", sta: "KET HKU SYP SHW CEN ADM WAC CAB TIH FOH NOP QUB TAK SWH SKW HFC CHW" },
+  TWL: { name: "Tsuen Wan Line", color: "#E2231A", sta: "CEN ADM TST JOR YMT MOK PRE SSP CSW LCK MEF LAK KWF KWH TWH TSW" },
+  KTL: { name: "Kwun Tong Line", color: "#00AB4E", sta: "WHA HOM YMT MOK PRE SKM KOT LOF WTS DIH CHH KOB NTK KWT LAT YAT TIK" },
+  TKL: { name: "Tseung Kwan O Line", color: "#7D499D", sta: "NOP QUB YAT TIK TKO LHP HAH POA" },
+  EAL: { name: "East Rail Line", color: "#5EB7E8", sta: "ADM EXC HUH MKK KOT TAW SHT FOT RAC UNI TAP TWO FAN SHS LOW LMC" },
+  TML: { name: "Tuen Ma Line", color: "#9A3B26", sta: "WKS MOS HEO TSH SHM CIO STW CKT TAW HIK DIH KAT SUW TKW HOM HUH ETS AUS NAC MEF TWW KSR YUL LOP TIS SIH TUM" },
+  SIL: { name: "South Island Line", color: "#BAC429", sta: "ADM OCP WCH LET SOH" },
+  TCL: { name: "Tung Chung Line", color: "#F7943E", sta: "HOK KOW OLY NAC LAK TSY SUN TUC" },
+  AEL: { name: "Airport Express", color: "#00888A", sta: "HOK KOW TSY AIR AWE" },
+  DRL: { name: "Disneyland Resort Line", color: "#F173AC", sta: "SUN DIS" }
+};
+const MTR_NAMES = { KET:"Kennedy Town", HKU:"HKU", SYP:"Sai Ying Pun", SHW:"Sheung Wan", CEN:"Central", ADM:"Admiralty", WAC:"Wan Chai",
+  CAB:"Causeway Bay", TIH:"Tin Hau", FOH:"Fortress Hill", NOP:"North Point", QUB:"Quarry Bay", TAK:"Tai Koo", SWH:"Sai Wan Ho",
+  SKW:"Shau Kei Wan", HFC:"Heng Fa Chuen", CHW:"Chai Wan", TST:"Tsim Sha Tsui", JOR:"Jordan", YMT:"Yau Ma Tei", MOK:"Mong Kok",
+  PRE:"Prince Edward", SSP:"Sham Shui Po", CSW:"Cheung Sha Wan", LCK:"Lai Chi Kok", MEF:"Mei Foo", LAK:"Lai King", KWF:"Kwai Fong",
+  KWH:"Kwai Hing", TWH:"Tai Wo Hau", TSW:"Tsuen Wan", WHA:"Whampoa", HOM:"Ho Man Tin", SKM:"Shek Kip Mei", KOT:"Kowloon Tong",
+  LOF:"Lok Fu", WTS:"Wong Tai Sin", DIH:"Diamond Hill", CHH:"Choi Hung", KOB:"Kowloon Bay", NTK:"Ngau Tau Kok", KWT:"Kwun Tong",
+  LAT:"Lam Tin", YAT:"Yau Tong", TIK:"Tiu Keng Leng", TKO:"Tseung Kwan O", LHP:"LOHAS Park", HAH:"Hang Hau", POA:"Po Lam",
+  EXC:"Exhibition Centre", HUH:"Hung Hom", MKK:"Mong Kok East", TAW:"Tai Wai", SHT:"Sha Tin", FOT:"Fo Tan", RAC:"Racecourse",
+  UNI:"University", TAP:"Tai Po Market", TWO:"Tai Wo", FAN:"Fanling", SHS:"Sheung Shui", LOW:"Lo Wu", LMC:"Lok Ma Chau",
+  WKS:"Wu Kai Sha", MOS:"Ma On Shan", HEO:"Heng On", TSH:"Tai Shui Hang", SHM:"Shek Mun", CIO:"City One", STW:"Sha Tin Wai",
+  CKT:"Che Kung Temple", HIK:"Hin Keng", KAT:"Kai Tak", SUW:"Sung Wong Toi", TKW:"To Kwa Wan", ETS:"East Tsim Sha Tsui",
+  AUS:"Austin", NAC:"Nam Cheong", TWW:"Tsuen Wan West", KSR:"Kam Sheung Road", YUL:"Yuen Long", LOP:"Long Ping", TIS:"Tin Shui Wai",
+  SIH:"Siu Hong", TUM:"Tuen Mun", OCP:"Ocean Park", WCH:"Wong Chuk Hang", LET:"Lei Tung", SOH:"South Horizons", HOK:"Hong Kong",
+  KOW:"Kowloon", OLY:"Olympic", TSY:"Tsing Yi", SUN:"Sunny Bay", TUC:"Tung Chung", AIR:"Airport", AWE:"AsiaWorld-Expo", DIS:"Disneyland Resort" };
+const MAX_MTR = 3;
 const APPS = { aircon: "com.tuya.smartlife", doorbell: "com.xiaomi.smarthome" };
 const MAX_PANELS = 4, MAX_ROUTES = 3;
 /* ============================================================= */
@@ -372,6 +464,46 @@ function toast(msg){
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
   clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove("show"), 2500);
 }
+
+/* ---- clock screensaver after inactivity ---- */
+let lastTouch = Date.now(), saverOn = false;
+const markActive = () => { lastTouch = Date.now(); };
+["pointerdown","keydown","wheel"].forEach(ev => window.addEventListener(ev, markActive, { capture: true, passive: true }));
+function saverText(){
+  const d = new Date();
+  let h = d.getHours(), m = String(d.getMinutes()).padStart(2,"0");
+  if (S.clock24h) $("svTime").textContent = `${String(h).padStart(2,"0")}:${m}`;
+  else { const ap = h < 12 ? "am" : "pm"; h = h % 12 || 12; $("svTime").innerHTML = `${h}:${m}<small>${ap}</small>`; }
+  $("svDate").textContent = d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  const icon = $("wxicon");
+  $("svWx").innerHTML = (icon && !icon.hidden && icon.src ? `<img src="${esc(icon.src)}" alt="">` : "") + esc($("temp").textContent || "");
+}
+function showSaver(){
+  if (saverOn) return;
+  saverOn = true;
+  const el = $("saver");
+  saverText(); el.hidden = false;
+  requestAnimationFrame(() => el.classList.add("on"));
+}
+function hideSaver(){
+  if (!saverOn) return;
+  saverOn = false; lastTouch = Date.now();
+  const el = $("saver"); el.classList.remove("on");
+  setTimeout(() => { if (!saverOn) el.hidden = true; }, 400);
+}
+$("saver").addEventListener("pointerup", e => { e.preventDefault(); e.stopPropagation(); hideSaver(); });
+$("saver").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); });
+function saverTick(){
+  const cfg = S.saver || {};
+  if (saverOn){
+    saverText();
+    // drift the clock slowly so the same pixels aren't lit all night
+    $("svInner").style.transform = `translate(${(Math.random()*8-4).toFixed(1)}vw, ${(Math.random()*8-4).toFixed(1)}vh)`;
+    return;
+  }
+  if (cfg.on && Date.now() - lastTouch > Math.max(1, Number(cfg.minutes) || 10) * 60000) showSaver();
+}
+setInterval(saverTick, 15000);
 
 /* ---- clock + night dim ---- */
 let undimUntil = 0;
@@ -470,8 +602,8 @@ async function allRoutes(){
   if (c && Date.now() - c.at < 7*86400000) return (routesMemo = c.list);
   const [ctb, kmb] = await Promise.allSettled([getJSON(`${CTB}/route/CTB`), getJSON(`${KMB}/route/`)]);
   const C = {}, K = {};
-  if (ctb.status === "fulfilled") for (const r of ctb.value.data || []) C[r.route] = { orig: r.orig_en, dest: r.dest_en };
-  if (kmb.status === "fulfilled") for (const r of kmb.value.data || []){
+  if (ctb.status === "fulfilled") for (const r of ctb.value?.data || []) C[r.route] = { orig: r.orig_en, dest: r.dest_en };
+  if (kmb.status === "fulfilled") for (const r of kmb.value?.data || []){
     if (String(r.service_type) !== "1") continue;
     const e = K[r.route] ||= {};
     e[r.bound === "I" ? "inbound" : "outbound"] = tidy(r.dest_en);
@@ -542,6 +674,9 @@ function buildPanels(){
     const stops = [...new Set(routes.map(stopKey))];
     const sec = document.createElement("section");
     sec.className = "col bus"; sec.id = "panel-" + i;
+    sec.tabIndex = 0; sec.setAttribute("role", "button"); sec.setAttribute("aria-label", `Edit ${p.title || "bus"} panel`);
+    sec.onclick = () => openPanelEditor(i);
+    sec.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openPanelEditor(i); } };
     sec.innerHTML = `<h2>${esc(p.title || "Buses")}</h2>` +
       (stops.length === 1 ? `<div class="where">${esc(stopLabel(routes[0]))}</div>` : "") +
       `<div class="rows"><div class="msg">${routes.length ? "Finding bus stops…" : "Add routes to this panel in Settings."}</div></div>`;
@@ -751,30 +886,99 @@ $("holiday").addEventListener("keydown", e => { if (e.key === "Enter" || e.key =
 $("holClose").onclick = () => $("holOverlay").classList.remove("open");
 
 /* ---- MTR ---- */
-const MTR_NAMES = { KET:"Kennedy Town", CHW:"Chai Wan", ADM:"Admiralty", LOW:"Lo Wu", LMC:"Lok Ma Chau",
-  SHS:"Sheung Shui", FAN:"Fanling", TAP:"Tai Po Market", TAW:"Tai Wai", HUH:"Hung Hom", NOP:"North Point",
-  CAB:"Causeway Bay", HFC:"Heng Fa Chuen", SKW:"Shau Kei Wan", SHW:"Sheung Wan", CEN:"Central" };
+const mtrSchedule = (line, sta) => getJSON(`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=${line}&sta=${sta}`);
 async function loadMTR(){
   const out = [];
-  for (const st of MTR_STATIONS){
+  const list = (S.mtr || []).filter(x => MTR_LINES[x.line]);
+  if (!list.length){ $("mtr-rows").innerHTML = `<div class="msg">Tap here to add MTR stations.</div>`; return; }
+  for (const st of list){
+    const L = MTR_LINES[st.line], name = MTR_NAMES[st.sta] || st.sta;
     try {
-      const j = await getJSON(`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=${st.line}&sta=${st.sta}`);
+      const j = await mtrSchedule(st.line, st.sta);
       const d = j.data?.[`${st.line}-${st.sta}`];
-      out.push(`<div class="stn">${st.name}${j.isdelay === "Y" ? ' <span class="delay">Delays</span>' : ""}</div>`);
+      out.push(`<div class="stn">${esc(name)}${list.some(o => o !== st && o.sta === st.sta) ? ", " + esc(L.name) : ""}${j.isdelay === "Y" ? ' <span class="delay">Delays</span>' : ""}</div>`);
       if (!d){ out.push(`<div class="msg">${esc(j.message || "No train data right now")}</div>`); continue; }
-      for (const dir of ["DOWN","UP"]){
+      const dirs = st.dir === "UP" || st.dir === "DOWN" ? [st.dir] : ["DOWN","UP"];
+      let shown = 0;
+      for (const dir of dirs){
         const trains = (d[dir] || []).filter(t => t.valid !== "N").slice(0,2);
         if (!trains.length) continue;
+        shown++;
         const dest = MTR_NAMES[trains[0].dest] || trains[0].dest;
         const mins = trains.map((t,k) => `<span class="${k ? "rest" : "first"}">${Number(t.ttnt) <= 0 ? "Now" : Number(t.ttnt)}</span>`).join(" ");
-        out.push(`<div class="tr"><span class="bar" style="background:${st.color}"></span><span class="to">to ${esc(dest)}</span><span class="t">${mins} <span class="rest">min</span></span></div>`);
+        out.push(`<div class="tr"><span class="bar" style="background:${L.color}"></span><span class="to">to ${esc(dest)}</span><span class="t">${mins} <span class="rest">min</span></span></div>`);
       }
+      if (!shown) out.push(`<div class="msg">No trains due right now</div>`);
     } catch {
-      out.push(`<div class="stn">${st.name}</div><div class="msg">Train times unavailable</div>`);
+      out.push(`<div class="stn">${esc(name)}</div><div class="msg">Train times unavailable</div>`);
     }
   }
   $("mtr-rows").innerHTML = out.join("");
 }
+
+/* ---- edit MTR stations ---- */
+function mtrRow(st){
+  const row = document.createElement("div");
+  row.className = "rt";
+  row.innerHTML = `<select class="m-line" aria-label="Line"><option value="">Choose a line</option>${Object.entries(MTR_LINES).map(([k,v]) => `<option value="${k}">${esc(v.name)}</option>`).join("")}</select>
+    <select class="m-sta" aria-label="Station" disabled></select>
+    <select class="m-dir" aria-label="Direction" disabled></select>
+    <button class="rm" aria-label="Remove this station">×</button>`;
+  const lineSel = row.querySelector(".m-line"), staSel = row.querySelector(".m-sta"), dirSel = row.querySelector(".m-dir");
+  const fillSta = want => {
+    const L = MTR_LINES[lineSel.value];
+    staSel.innerHTML = L ? `<option value="">Choose a station</option>` + L.sta.split(" ").map(c => `<option value="${c}">${esc(MTR_NAMES[c] || c)}</option>`).join("") : "";
+    staSel.disabled = !L; staSel.value = want || "";
+    fillDir(want ? st?.dir : null);
+  };
+  const fillDir = async want => {
+    dirSel.innerHTML = `<option value="both">Both directions</option>`; dirSel.disabled = !staSel.value;
+    dirSel.value = "both";
+    if (!staSel.value) return;
+    const line = lineSel.value, sta = staSel.value;
+    try {                                              // name each direction by where its trains are heading right now
+      const j = await mtrSchedule(line, sta), d = j.data?.[`${line}-${sta}`] || {};
+      if (lineSel.value !== line || staSel.value !== sta) return;
+      for (const dir of ["DOWN","UP"]){
+        const dests = [...new Set((d[dir] || []).map(t => MTR_NAMES[t.dest] || t.dest))];
+        if (dests.length) dirSel.insertAdjacentHTML("beforeend", `<option value="${dir}">Only to ${esc(dests.slice(0,2).join(" or "))}</option>`);
+      }
+    } catch {}
+    if (want && [...dirSel.options].some(o => o.value === want)) dirSel.value = want;
+    else if (want === "UP" || want === "DOWN"){ dirSel.insertAdjacentHTML("beforeend", `<option value="${want}">One direction only</option>`); dirSel.value = want; }
+  };
+  lineSel.onchange = () => fillSta(null);
+  staSel.onchange = () => fillDir(null);
+  row.querySelector(".rm").onclick = () => { row.remove(); mtrCount(); };
+  if (st){ lineSel.value = st.line; fillSta(st.sta); }
+  $("mtr-edit-rows").appendChild(row);
+  mtrCount();
+  return row;
+}
+function mtrCount(){ $("mtrAdd").disabled = $("mtr-edit-rows").children.length >= MAX_MTR; }
+function openMtrEditor(){
+  $("mtr-edit-rows").innerHTML = "";
+  const list = (S.mtr || []).filter(x => MTR_LINES[x.line]);
+  (list.length ? list : [null]).slice(0, MAX_MTR).forEach(mtrRow);
+  $("mtrOverlay").classList.add("open");
+}
+$("mtrAdd").onclick = () => { if ($("mtr-edit-rows").children.length < MAX_MTR) mtrRow(null).querySelector(".m-line").focus(); };
+$("mtrCancel").onclick = () => $("mtrOverlay").classList.remove("open");
+$("mtrSave").onclick = () => {
+  const rows = [...$("mtr-edit-rows").children];
+  const bad = rows.find(r => r.querySelector(".m-line").value && !r.querySelector(".m-sta").value);
+  if (bad){ alert("Pick a station for each line, or remove the row."); return; }
+  S.mtr = rows.map(r => ({ line: r.querySelector(".m-line").value, sta: r.querySelector(".m-sta").value, dir: r.querySelector(".m-dir").value || "both" }))
+              .filter(x => x.line && x.sta);
+  const saved = store.get("dashSettings") || {}; saved.mtr = S.mtr; store.set("dashSettings", saved);
+  $("mtrOverlay").classList.remove("open");
+  $("mtr-rows").innerHTML = `<div class="msg">Loading trains…</div>`;
+  loadMTR();
+};
+{ const box = document.querySelector(".mtr");
+  box.id = "mtrBox"; box.tabIndex = 0; box.setAttribute("role", "button"); box.setAttribute("aria-label", "Edit MTR stations");
+  box.onclick = openMtrEditor;
+  box.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openMtrEditor(); } }; }
 
 /* ---- calendar ---- */
 const calUrl = (mode, nav) => "https://calendar.google.com/calendar/embed?" + new URLSearchParams({
@@ -828,6 +1032,14 @@ function renderSettings(src){
     </div>
   </section>
   <section>
+    <h3>Screensaver</h3>
+    <p class="hint">After a while without a tap, the screen fades to a big clock with the date and temperature. Tap anywhere to return.</p>
+    <div class="fields">
+      <label class="field check"><input type="checkbox" id="s-sv" ${src.saver?.on ? "checked" : ""}> Show the clock screensaver</label>
+      <label class="field">Start after (minutes)<input type="number" id="s-svmin" min="1" max="120" value="${esc(src.saver?.minutes ?? 10)}"></label>
+    </div>
+  </section>
+  <section>
     <h3>Weather</h3>
     <p class="hint">Temperature comes from the Hong Kong Observatory station you pick. The name shown is what appears on screen, so you can call Happy Valley "Wan Chai", for example.</p>
     <div class="fields">
@@ -865,6 +1077,7 @@ function readSettings(){
     theme: v("s-theme"),
     themeCustom: { light: v("s-light") || "07:00", dark: v("s-dark") || "19:00" },
     nightDim: { on: $("s-dim").checked, from: v("s-dimfrom") || "23:30", to: v("s-dimto") || "06:30" },
+    saver: { on: $("s-sv").checked, minutes: Math.min(120, Math.max(1, parseInt(v("s-svmin"), 10) || 10)) },
     weather: { station: v("s-station"), label: v("s-label"), rainDistrict: v("s-rain") },
     panels: Array.from({length: MAX_PANELS}, (_, i) => ({
       title: v(`s-p${i}-title`),
@@ -874,27 +1087,25 @@ function readSettings(){
 }
 /* ---- route / direction / stop dropdowns ---- */
 let pendingRows = 0;
-function status(){ $("s-status").textContent = pendingRows ? "Loading bus stops…" : ""; }
+function status(){ document.querySelectorAll(".set-status").forEach(el => { if (!el.dataset.err) el.textContent = pendingRows ? "Loading bus stops…" : ""; }); }
+const rowKey = (r, byKey) => { if (!r) return ""; const R = r.route.toUpperCase();
+  return r.op ? `${r.op}|${R}` : (byKey["JOINT|" + R] ? "JOINT|" + R : "CTB|" + R); };   // older rows used Citybus stops
+function setupRow(row, routes, byKey, r){
+  const sel = row.querySelector(".r-route"), key = rowKey(r, byKey);
+  sel.innerHTML = `<option value="">None</option>` + (key && !byKey[key] ? `<option value="${esc(key)}">${esc(r.route)}</option>` : "") +
+    routes.map(x => `<option value="${esc(x.key)}">${esc(x.label)}</option>`).join("");
+  sel.value = key; row._byKey = byKey;
+  sel.onchange = () => loadRow(row, null);
+  if (r) loadRow(row, r);
+}
 async function fillRouteRows(src){
   let routes = [];
+  const st = $("s-status"); delete st.dataset.err;
   try { routes = await allRoutes(); }
-  catch { $("s-status").textContent = "Couldn't load the bus route lists. Check the Wi-Fi connection."; }
+  catch { st.dataset.err = 1; st.textContent = "Couldn't load the bus route lists. Check the Wi-Fi connection."; }
   const byKey = Object.fromEntries(routes.map(r => [r.key, r]));
-  const opts = routes.map(x => `<option value="${esc(x.key)}">${esc(x.label)}</option>`).join("");
-  for (let i = 0; i < MAX_PANELS; i++) for (let k = 0; k < MAX_ROUTES; k++){
-    const row = $(`s-p${i}-row${k}`), r = src.panels[i]?.routes?.[k];
-    const sel = row.querySelector(".r-route");
-    let key = "";
-    if (r){
-      const R = r.route.toUpperCase();
-      key = r.op ? `${r.op}|${R}` : (byKey["JOINT|" + R] ? "JOINT|" + R : "CTB|" + R);  // older rows used Citybus stops
-    }
-    sel.innerHTML = `<option value="">None</option>` + (key && !byKey[key] ? `<option value="${esc(key)}">${esc(r.route)}</option>` : "") + opts;
-    sel.value = key;
-    row._byKey = byKey;
-    sel.onchange = () => loadRow(row, null);
-    if (r) loadRow(row, r);
-  }
+  for (let i = 0; i < MAX_PANELS; i++) for (let k = 0; k < MAX_ROUTES; k++)
+    setupRow($(`s-p${i}-row${k}`), routes, byKey, src.panels[i]?.routes?.[k]);
 }
 async function loadRow(row, want){
   const key = row.querySelector(".r-route").value;
@@ -946,6 +1157,51 @@ function readRow(row){
   return { op, route, dir, stopId, stopName: st?.name || "" };
 }
 
+/* ---- edit a single bus panel ---- */
+let peIndex = -1, peRoutes = [], peByKey = {};
+function peRow(r){
+  const row = document.createElement("div");
+  row.className = "rt";
+  row.innerHTML = `<select class="r-route" aria-label="Route"></select>
+    <select class="r-dir" aria-label="Direction" disabled></select>
+    <select class="r-stop" aria-label="Stop" disabled></select>
+    <button class="rm" aria-label="Remove this route">×</button>`;
+  row.querySelector(".rm").onclick = () => { row.remove(); peCount(); };
+  $("pe-rows").appendChild(row);
+  setupRow(row, peRoutes, peByKey, r);
+  peCount();
+  return row;
+}
+function peCount(){ $("peAdd").disabled = $("pe-rows").children.length >= MAX_ROUTES; }
+async function openPanelEditor(i){
+  peIndex = i;
+  const p = S.panels[i] || { title: "", routes: [] };
+  $("pe-title").value = p.title || "";
+  $("pe-rows").innerHTML = "";
+  const st = $("pe-status"); st.textContent = "Loading routes…"; delete st.dataset.err;
+  $("peOverlay").classList.add("open");
+  try { peRoutes = await allRoutes(); st.textContent = ""; }
+  catch { peRoutes = []; st.dataset.err = 1; st.textContent = "Couldn't load the bus route lists. Check the Wi-Fi connection."; }
+  peByKey = Object.fromEntries(peRoutes.map(r => [r.key, r]));
+  const rows = (p.routes || []).filter(r => r.route);
+  if (rows.length) rows.slice(0, MAX_ROUTES).forEach(peRow); else peRow(null);
+}
+$("peAdd").onclick = () => { if ($("pe-rows").children.length < MAX_ROUTES) peRow(null).querySelector(".r-route").focus(); };
+$("peCancel").onclick = () => $("peOverlay").classList.remove("open");
+$("peSave").onclick = () => {
+  if (pendingRows > 0){ alert("Still loading bus stops. Try again in a moment."); return; }
+  const rows = [...$("pe-rows").children];
+  const bad = rows.find(row => row.querySelector(".r-route").value && !row.querySelector(".r-stop").value);
+  if (bad){ alert(`Route ${bad.querySelector(".r-route").value.split("|")[1]} needs a direction and stop.`); return; }
+  const routes = rows.map(readRow).filter(Boolean);
+  while (S.panels.length <= peIndex) S.panels.push({ title: "", routes: [] });
+  S.panels[peIndex] = { title: $("pe-title").value.trim(), routes };
+  const saved = store.get("dashSettings") || {};
+  saved.panels = S.panels; store.set("dashSettings", saved);
+  $("peOverlay").classList.remove("open");
+  buildPanels(); loadBuses();
+};
+
 $("btn-settings").onclick = () => { renderSettings(S); fillRouteRows(S); $("setOverlay").classList.add("open"); };
 $("setCancel").onclick = () => $("setOverlay").classList.remove("open");
 $("setReset").onclick = () => { const d = clone(DEFAULTS); renderSettings(d); fillRouteRows(d); };
@@ -960,12 +1216,24 @@ $("setSave").onclick = () => {
 };
 
 /* ---- app buttons (Fully Kiosk Browser) ---- */
-function openApp(pkg){
-  if (window.fully && fully.startApplication) fully.startApplication(pkg);
-  else location.href = `intent:#Intent;package=${pkg};end`;
+function openApp(pkg, name){
+  let tried = "";
+  if (window.fully && typeof fully.startApplication === "function"){
+    try { fully.startApplication(pkg); tried = "fully"; } catch {}
+  }
+  if (!tried){
+    tried = "intent";
+    location.href = `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${pkg};end`;
+  }
+  // If we're still on the dashboard after a moment, the app didn't open
+  setTimeout(() => {
+    if (document.visibilityState !== "visible") return;
+    toast(window.fully ? `Couldn't open ${name}. Check it's installed.`
+                       : `To open ${name}, turn on "Enable JavaScript Interface" in Fully's Advanced Web Settings.`);
+  }, 2000);
 }
-$("btn-ac").onclick = () => openApp(APPS.aircon);
-$("btn-door").onclick = () => openApp(APPS.doorbell);
+$("btn-ac").onclick = () => openApp(APPS.aircon, "Smart Life");
+$("btn-door").onclick = () => openApp(APPS.doorbell, "Xiaomi Home");
 $("btn-refresh").onclick = async () => {
   const b = $("btn-refresh");
   if (b.disabled) return;

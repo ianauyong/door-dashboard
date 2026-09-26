@@ -168,34 +168,44 @@ input,select{font:500 16px var(--font);color:var(--text);background:var(--field)
 
 #wxBox{cursor:pointer;touch-action:manipulation;border-radius:10px;padding:2px 6px;margin:-2px -6px}
 #wxBox:focus-visible{outline:3px solid var(--plate)}
-.wx-body{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr);gap:10px}
-.wx-top{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px;min-height:0}
-.wx-card{background:var(--panel);border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;min-height:0}
+.wx-body{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1.5fr) minmax(0,1fr);gap:10px}
+.wx-top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-height:0}
+.wx-card{background:var(--panel);border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden}
 .wx-card .lbl{font-size:16px;font-weight:600;color:var(--muted)}
-.hero{flex:1;display:flex;align-items:center;gap:18px;min-height:0}
-.hero img{width:clamp(90px,22vh,150px);height:clamp(90px,22vh,150px)}
-.hero .big{font-family:var(--display);font-weight:600;font-size:clamp(64px,17vh,120px);line-height:.85}
+.hero{display:flex;align-items:center;gap:16px;min-height:0}
 .hero > div{min-width:0}
-.hero.tmr2 .big{font-size:clamp(56px,14vh,100px)}
-.hero.tmr2 .lo{font-size:clamp(30px,7vh,52px)}
-.hero .lo{font-family:var(--display);font-weight:600;font-size:clamp(34px,8vh,60px);color:var(--muted);margin-left:6px}
-.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:17px;font-weight:600}
-.stats span{color:var(--muted);font-weight:500}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.hero img{width:clamp(80px,17vh,128px);height:clamp(80px,17vh,128px);flex:none}
+.hero .big{font-family:var(--display);font-weight:600;font-size:clamp(56px,13vh,100px);line-height:.85}
+.hero .lo{font-family:var(--display);font-weight:600;font-size:clamp(30px,6.5vh,50px);color:var(--muted);margin-left:6px}
+.hero .hint2{font-size:15px;color:var(--muted);margin-top:4px}
+.desc{font-size:clamp(15px,2.3vh,18px);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.facts2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 16px;font-size:clamp(14px,2.1vh,17px);margin-top:auto}
+.facts2 div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.facts2 span{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips:empty{display:none}
 .days8{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;min-height:0}
-.day{background:var(--panel);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;min-height:0}
+.day{background:var(--panel);border:0;color:var(--text);font-family:var(--font);border-radius:12px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;min-height:0;cursor:pointer;touch-action:manipulation}
+.day:active{filter:brightness(1.1)}
+.day:focus-visible{outline:3px solid var(--plate);outline-offset:2px}
 .day b{font-size:17px}
-.day img{width:clamp(44px,11vh,72px);height:clamp(44px,11vh,72px)}
-.day .hi{font-family:var(--display);font-size:clamp(24px,5vh,34px);font-weight:600;line-height:1}
-.day .lo2{font-family:var(--display);font-size:clamp(18px,3.6vh,24px);font-weight:600;color:var(--muted);line-height:1}
-.rainbar{display:flex;gap:3px;margin-top:6px}
+.day small{display:block;font-size:13px;color:var(--muted);font-weight:500}
+.day img{width:clamp(40px,9vh,64px);height:clamp(40px,9vh,64px)}
+.day .hi{font-family:var(--display);font-size:clamp(22px,4.4vh,32px);font-weight:600;line-height:1}
+.day .lo2{font-family:var(--display);font-size:clamp(17px,3.2vh,22px);font-weight:600;color:var(--muted);line-height:1}
+.rainbar{display:inline-flex;gap:3px;vertical-align:middle}
 .rainbar i{width:10px;height:6px;border-radius:2px;background:var(--line)}
 .rainbar i.on{background:#4BA3E3}
-.rainrow{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted)}
-.rainrow .rainbar{margin-top:0}
-.rainrow .rainbar i{width:16px;height:9px}
-@media (orientation:portrait){ .wx-top{grid-template-columns:1fr} .days8{grid-template-columns:repeat(4,minmax(0,1fr))} .wx-body{grid-template-rows:auto auto;overflow:auto} }
+.facts2 .rainbar i{width:12px;height:7px}
+#dayOverlay{z-index:12}
+.dd{flex:1;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:10px;min-height:0}
+.dd .wx-card{justify-content:center}
+.dd .hero img{width:clamp(110px,26vh,180px);height:clamp(110px,26vh,180px)}
+.dd .hero .big{font-size:clamp(70px,17vh,130px)}
+.dd .desc{-webkit-line-clamp:unset;font-size:clamp(18px,3vh,24px)}
+.dd .facts2{grid-template-columns:1fr;gap:10px;font-size:clamp(17px,2.8vh,22px);margin-top:12px}
+.dd .facts2 div{white-space:normal}
+@media (orientation:portrait){ .wx-top,.dd{grid-template-columns:1fr} .days8{grid-template-columns:repeat(4,minmax(0,1fr))} .wx-body{grid-template-rows:auto auto;overflow:auto} }
 #saver{position:fixed;inset:0;z-index:18;background:#000;color:#F4F6F8;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 1.2s;touch-action:manipulation;cursor:pointer}
 #saver[hidden]{display:none}
 #saver.on{opacity:1}
@@ -347,6 +357,15 @@ body.night #dim{opacity:.65;pointer-events:auto}
   <div class="set-body" id="warnBody"></div>
 </div>
 
+<!-- One forecast day -->
+<div class="overlay" id="dayOverlay" role="dialog" aria-label="Forecast for one day">
+  <div class="ov-head">
+    <h2 id="ddTitle">Forecast</h2>
+    <button class="btn" id="ddClose">Close</button>
+  </div>
+  <div class="dd" id="ddBody"></div>
+</div>
+
 <!-- Weather details -->
 <div class="overlay" id="wxOverlay" role="dialog" aria-label="Weather details">
   <div class="ov-head">
@@ -397,7 +416,7 @@ const DEFAULTS = {
   themeCustom: { light: "07:00", dark: "19:00" },
   nightDim: { on: true, from: "23:30", to: "06:30" },
   saver: { on: true, minutes: 10 },
-  nightlight: { on: true, minutes: 2 },
+  nightlight: { on: true, minutes: 2, from: "01:00", to: "06:00" },   // warm glow when Fully PLUS detects motion
   aircon: { relay: "", key: "", units: [] },            // units: [{ name, id }] — filled in on the tablet               // warm glow when Fully PLUS detects motion at night       // clock screensaver after this many idle minutes
   weather: { station: "Happy Valley", label: "Wan Chai", rainDistrict: "Wan Chai" },
   mtr: [ { line: "ISL", sta: "WAC", dir: "both" }, { line: "EAL", sta: "EXC", dir: "both" } ],
@@ -527,7 +546,12 @@ function toast(msg){
 
 /* ---- clock screensaver after inactivity ---- */
 let lastTouch = Date.now(), saverOn = false;
-const markActive = () => { lastTouch = Date.now(); };
+let nlQuietUntil = 0;
+const markActive = () => {
+  lastTouch = Date.now();
+  nlQuietUntil = Date.now() + 5*60000;                       // no night light for 5 minutes after any tap
+  if (typeof undimUntil !== "undefined" && undimUntil > Date.now()) undimUntil = Date.now() + 60000;   // each tap keeps it bright
+};
 ["pointerdown","keydown","wheel"].forEach(ev => window.addEventListener(ev, markActive, { capture: true, passive: true }));
 function saverText(){
   const d = new Date();
@@ -629,12 +653,14 @@ $("pkList").addEventListener("click", e => {
 $("pkClose").onclick = () => { $("picker").classList.remove("open"); pkSel?._pick?.focus(); pkSel = null; };
 
 /* ---- motion (Fully PLUS) and night light ---- */
-function isNightHours(){
+function inWindow(from, to){
   const d = new Date(), mins = d.getHours()*60 + d.getMinutes();
   const toM = s => { const [a,b] = String(s).split(":").map(Number); return a*60 + b; };
-  const f = toM(S.nightDim.from), t = toM(S.nightDim.to);
+  const f = toM(from), t = toM(to);
   return f > t ? (mins >= f || mins < t) : (mins >= f && mins < t);
 }
+const isNightHours = () => inWindow(S.nightDim.from, S.nightDim.to);
+const isNightlightHours = () => inWindow(S.nightlight?.from || "01:00", S.nightlight?.to || "06:00");
 let nlTimer = null, nlOn = false, nlBrightness = null;
 const hasFully = fn => window.fully && typeof fully[fn] === "function";
 function nlClock(){
@@ -659,11 +685,22 @@ function hideNightlight(){
   try { if (nlBrightness != null && hasFully("setScreenBrightness")) fully.setScreenBrightness(nlBrightness); } catch {}
   nlBrightness = null;
 }
-$("nightlight").addEventListener("pointerup", e => { e.preventDefault(); e.stopPropagation(); hideNightlight(); });
+$("nightlight").addEventListener("pointerup", e => { e.preventDefault(); e.stopPropagation(); hideNightlight(); wakeDashboard(); });
 $("nightlight").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); });
+function wakeDashboard(){                                   // show the dashboard, undimmed for a minute
+  hideSaver(); lastTouch = Date.now();
+  if (isNightHours()){ undimUntil = Date.now() + 60000; document.body.classList.remove("night"); }
+}
 window.__dashMotion = () => {
-  if (S.nightlight?.on && isNightHours()){ lastTouch = Date.now(); showNightlight(); }
-  else { lastTouch = Date.now(); hideSaver(); undimUntil = Date.now() + 60000; document.body.classList.remove("night"); }
+  if (nlOn){ showNightlight(); return; }                     // someone's still around: keep the glow on
+  const nlTime = S.nightlight?.on && isNightlightHours();
+  if (nlTime){
+    // only glow when nobody's been using the dashboard, and not straight after a tap
+    if (saverOn && Date.now() > nlQuietUntil) showNightlight();
+    else if (!saverOn) lastTouch = Date.now();              // you're at the screen: just keep it awake
+    return;
+  }
+  if (saverOn) wakeDashboard(); else lastTouch = Date.now();
 };
 if (hasFully("bind")) { try { fully.bind("onMotion", "window.__dashMotion && window.__dashMotion()"); } catch {} }
 
@@ -682,7 +719,7 @@ function tick(){
   const night = S.nightDim.on && (f > t ? (mins >= f || mins < t) : (mins >= f && mins < t));
   if (!undimUntil || Date.now() > undimUntil) document.body.classList.toggle("night", night);
 }
-$("dim").addEventListener("click", () => { undimUntil = Date.now() + 60000; document.body.classList.remove("night"); });
+$("dim").addEventListener("click", () => { wakeDashboard(); undimUntil = Date.now() + 60000; document.body.classList.remove("night"); });
 
 /* ---- weather warnings: names and details ---- */
 const WARN_NAMES = { WRAINA:"Amber rainstorm", WRAINR:"Red rainstorm", WRAINB:"Black rainstorm",
@@ -946,55 +983,115 @@ async function loadBuses(){
   $("updated").textContent = "Buses updated " + new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
 }
 
-/* ---- weather details: big icons for reading from across the room ---- */
+/* ---- weather details: big, glanceable, with a tap-in view per day ---- */
 const hkoIcon = c => `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${c}.png`;
 const PSR_LEVEL = { "low": 1, "medium low": 2, "medium": 3, "medium high": 4, "high": 5 };
 const rainBar = psr => { const n = PSR_LEVEL[String(psr || "").toLowerCase()] || 0;
   return `<span class="rainbar" role="img" aria-label="Chance of rain: ${esc(psr || "unknown")}">${[1,2,3,4,5].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>`; };
+const ymdDate = ymd => new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}T12:00:00+08:00`);
 const dayName = ymd => {
   if (!ymd) return "";
-  const d = new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}T12:00:00+08:00`);
   const tmr = new Date(Date.now() + 8*3600000 + 86400000).toISOString().slice(0,10).replace(/-/g,"");
-  return ymd === tmr ? "Tomorrow" : d.toLocaleDateString("en-GB", { weekday: "short", timeZone: "Asia/Hong_Kong" });
+  return ymd === tmr ? "Tomorrow" : ymdDate(ymd).toLocaleDateString("en-GB", { weekday: "short", timeZone: "Asia/Hong_Kong" });
 };
+const shortDate = ymd => ymd ? ymdDate(ymd).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Asia/Hong_Kong" }) : "";
+const longDate = ymd => ymd ? ymdDate(ymd).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Hong_Kong" }) : "";
+// "East force 3 to 4, occasionally 5." -> "E 3–4 (5)"
+const DIRS = { north:"N", south:"S", east:"E", west:"W", northeast:"NE", northwest:"NW", southeast:"SE", southwest:"SW",
+  "north to northeast":"N–NE", "east to northeast":"E–NE", "east to southeast":"E–SE", "south to southwest":"S–SW",
+  "south to southeast":"S–SE", "west to southwest":"W–SW", "north to northwest":"N–NW", "east to southeasterly":"E–SE" };
+function shortWind(t){
+  if (!t) return "";
+  const s = String(t).toLowerCase().replace(/\.$/, "");
+  const m = s.match(/^([a-z\s]+?)\s+force\s+(\d+)(?:\s+to\s+(\d+))?(?:.*?occasionally\s+(\d+))?/);
+  if (!m) return String(t).replace(/\.$/, "");
+  const dir = DIRS[m[1].trim()] || m[1].trim().replace(/\b[a-z]/g, c => c.toUpperCase());
+  return `${dir} ${m[2]}${m[3] ? "–" + m[3] : ""}${m[4] ? " (" + m[4] + ")" : ""}`;
+}
+function todayHigh(text){                                // pick today's high out of the Observatory's wording
+  const t = String(text || "");
+  const m = t.match(/maximum temperature (?:of |around |about |near |at )?(?:about |around )?(\d{1,2})/i)
+         || t.match(/temperatures? (?:ranging )?between \d{1,2} and (\d{1,2}) degrees/i)
+         || t.match(/(?:high|maximum) of (\d{1,2})/i);
+  return m ? Number(m[1]) : null;
+}
+const firstSentences = (t, max = 140) => { const s = String(t || "").trim(); if (s.length <= max) return s;
+  const cut = s.slice(0, max); const i = cut.lastIndexOf(". "); return i > 40 ? cut.slice(0, i + 1) : cut.replace(/\s+\S*$/, "") + "…"; };
+let flwCache = { at: 0, data: null };
+async function getFlw(){
+  if (flwCache.data && Date.now() - flwCache.at < 10*60000) return flwCache.data;
+  try { flwCache = { at: Date.now(), data: await getJSON(`${HKO}?dataType=flw&lang=en`) }; } catch {}
+  return flwCache.data;
+}
+const sunFor = ymd => sunTimes(ymd ? ymdDate(ymd) : new Date());
+function dayFacts(f, full){
+  const sun = sunFor(f.forecastDate);
+  return `
+    <div><span>Rain</span> ${rainBar(f.PSR)} ${esc(String(f.PSR || "").toLowerCase())}</div>
+    <div><span>Humidity</span> ${f.forecastMinrh?.value ?? "–"}–${f.forecastMaxrh?.value ?? "–"}%</div>
+    <div title="${esc(f.forecastWind)}"><span>Wind</span> ${esc(full ? String(f.forecastWind || "–").replace(/\.$/, "") : shortWind(f.forecastWind))}</div>
+    ${full ? `<div><span>Sunrise</span> ${fmtTime(sun.rise)}</div><div><span>Sunset</span> ${fmtTime(sun.set)}</div>`
+           : `<div><span>Sun</span> ${fmtTime(sun.rise)} – ${fmtTime(sun.set)}</div>`}`;
+}
+let wxDays = [];
 async function openWeather(){
   $("wxOverlay").classList.add("open");
   if (!wxLatest) { $("wxBody").innerHTML = `<div class="msg">Loading the forecast…</div>`; await loadWeather(); }
   if (!wxLatest){ $("wxBody").innerHTML = `<div class="msg">The forecast isn't available right now. Check the Wi-Fi connection.</div>`; return; }
+  const flw = await getFlw();
   const { now, fnd } = wxLatest, W = S.weather;
   const temps = now.temperature?.data || [];
   const t = temps.find(x => x.place === W.station) || temps.find(x => x.place === "Hong Kong Observatory") || temps[0];
   const place = !t ? "Hong Kong" : t.place === W.station ? (W.label || W.station) : t.place;
   const hum = now.humidity?.data?.[0]?.value, uv = now.uvindex?.data?.[0], sun = sunTimes(new Date());
   const uvCls = uv && uv.value !== "" ? (+uv.value >= 8 ? "uv-vhi" : +uv.value >= 6 ? "uv-hi" : "") : "";
-  const days = fnd?.weatherForecast || [];
-  const [f0, ...rest] = days;
+  const hi = todayHigh(flw?.forecastDesc);
+  const todayYmd = new Date(Date.now() + 8*3600000).toISOString().slice(0,10).replace(/-/g,"");
+  wxDays = (fnd?.weatherForecast || []).filter(f => !f.forecastDate || f.forecastDate > todayYmd);   // future days only
+  const [f0, ...rest] = wxDays;
 
-  const nowCard = `<div class="wx-card">
-      <div class="lbl">${esc(place)} now</div>
-      <div class="hero">${now.icon?.[0] ? `<img src="${hkoIcon(now.icon[0])}" alt="">` : ""}<div class="big">${t ? Math.round(t.value) + "°" : "--°"}</div></div>
-      <div class="stats">
-        ${hum != null ? `<div><span>Humidity</span> ${hum}%</div>` : ""}
-        ${uv && uv.value !== "" ? `<div class="${uvCls}"><span>UV</span> ${esc(uv.value)}</div>` : ""}
-        <div><span>Sunrise</span> ${fmtTime(sun.rise)}</div><div><span>Sunset</span> ${fmtTime(sun.set)}</div>
-      </div>
+  const todayCard = `<div class="wx-card">
+      <div class="lbl">Today in ${esc(place)}</div>
+      <div class="hero">${now.icon?.[0] ? `<img src="${hkoIcon(now.icon[0])}" alt="">` : ""}
+        <div><span class="big">${t ? Math.round(t.value) + "°" : "--°"}</span>${hi != null ? `<div class="hint2">High around ${hi}°</div>` : ""}</div></div>
+      ${flw?.forecastDesc ? `<div class="desc" title="${esc(flw.forecastDesc)}">${esc(firstSentences(flw.forecastDesc))}</div>` : ""}
       <div class="chips">${$("warns").innerHTML}</div>
+      <div class="facts2">
+        <div><span>Humidity</span> ${hum != null ? hum + "%" : "–"}</div>
+        <div class="${uvCls}"><span>UV</span> ${uv && uv.value !== "" ? esc(uv.value + (uv.desc ? " " + uv.desc : "")) : "–"}</div>
+        <div><span>Sunrise</span> ${fmtTime(sun.rise)}</div>
+        <div><span>Sunset</span> ${fmtTime(sun.set)}</div>
+      </div>
     </div>`;
   const tmrCard = f0 ? `<div class="wx-card">
-      <div class="lbl">${dayName(f0.forecastDate)}</div>
-      <div class="hero tmr2"><img src="${hkoIcon(f0.ForecastIcon)}" alt="${esc(f0.forecastWeather)}">
+      <div class="lbl">${dayName(f0.forecastDate)}, ${shortDate(f0.forecastDate)}</div>
+      <div class="hero"><img src="${hkoIcon(f0.ForecastIcon)}" alt="">
         <div><span class="big">${f0.forecastMaxtemp.value}°</span><span class="lo">${f0.forecastMintemp.value}°</span></div></div>
-      <div class="rainrow">Rain ${rainBar(f0.PSR)}</div>
+      <div class="desc" title="${esc(f0.forecastWeather)}">${esc(f0.forecastWeather)}</div>
+      <div class="facts2">${dayFacts(f0)}</div>
     </div>` : `<div class="wx-card"><div class="msg">No forecast right now.</div></div>`;
-  const strip = rest.slice(0, 8).map(f => `<div class="day">
-      <b>${dayName(f.forecastDate)}</b>
-      <img src="${hkoIcon(f.ForecastIcon)}" alt="${esc(f.forecastWeather)}">
+  const strip = rest.slice(0, 8).map((f, i) => `<button class="day" data-d="${i + 1}" aria-label="${esc(longDate(f.forecastDate))}, ${esc(f.forecastWeather)} Tap for details.">
+      <div><b>${dayName(f.forecastDate)}</b><small>${shortDate(f.forecastDate)}</small></div>
+      <img src="${hkoIcon(f.ForecastIcon)}" alt="">
       <div><div class="hi">${f.forecastMaxtemp.value}°</div><div class="lo2">${f.forecastMintemp.value}°</div></div>
       ${rainBar(f.PSR)}
-    </div>`).join("");
-
-  $("wxBody").innerHTML = `<div class="wx-top">${nowCard}${tmrCard}</div><div class="days8">${strip}</div>`;
+    </button>`).join("");
+  $("wxBody").innerHTML = `<div class="wx-top">${todayCard}${tmrCard}</div><div class="days8">${strip}</div>`;
 }
+function openDay(i){
+  const f = wxDays[i]; if (!f) return;
+  $("ddTitle").textContent = longDate(f.forecastDate);
+  $("ddBody").innerHTML = `
+    <div class="wx-card"><div class="hero"><img src="${hkoIcon(f.ForecastIcon)}" alt="">
+      <div><span class="big">${f.forecastMaxtemp.value}°</span><span class="lo">${f.forecastMintemp.value}°</span></div></div></div>
+    <div class="wx-card">
+      <div class="desc">${esc(f.forecastWeather)}</div>
+      <div class="facts2">${dayFacts(f, true)}</div>
+    </div>`;
+  $("dayOverlay").classList.add("open");
+}
+$("wxBody").addEventListener("click", e => { const d = e.target.closest(".day[data-d]"); if (d) openDay(+d.dataset.d); });
+$("ddClose").onclick = () => $("dayOverlay").classList.remove("open");
 $("wxBox").addEventListener("click", openWeather);
 $("wxBox").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openWeather(); } });
 $("wxClose").onclick = () => $("wxOverlay").classList.remove("open");
@@ -1253,10 +1350,12 @@ function renderSettings(src){
   </section>
   <section>
     <h3>Night light</h3>
-    <p class="hint">Needs Fully Kiosk PLUS with motion detection turned on. During your night dimming hours, walking past turns the screen into a warm glow, then it fades back after the time below. At other times, motion just wakes the dashboard.</p>
+    <p class="hint">Needs Fully Kiosk PLUS with motion detection turned on. During the hours below, walking past the clock screen turns it into a warm glow, then it fades back. It only glows when nobody's been using the dashboard, and not for 5 minutes after a tap. At other times, motion just wakes the dashboard.</p>
     <div class="fields">
       <label class="field check"><input type="checkbox" id="s-nl" ${src.nightlight?.on ? "checked" : ""}> Glow when motion is detected at night</label>
       <label class="field">Stay on for (minutes)<input type="number" id="s-nlmin" min="1" max="30" value="${esc(src.nightlight?.minutes ?? 2)}"></label>
+      <label class="field">Night light from<input type="time" id="s-nlfrom" value="${esc(src.nightlight?.from || "01:00")}"></label>
+      <label class="field">Night light until<input type="time" id="s-nlto" value="${esc(src.nightlight?.to || "06:00")}"></label>
     </div>
   </section>
   <section>
@@ -1316,7 +1415,8 @@ function readSettings(){
     theme: v("s-theme"),
     themeCustom: { light: v("s-light") || "07:00", dark: v("s-dark") || "19:00" },
     nightDim: { on: $("s-dim").checked, from: v("s-dimfrom") || "23:30", to: v("s-dimto") || "06:30" },
-    nightlight: { on: $("s-nl").checked, minutes: Math.min(30, Math.max(1, parseInt(v("s-nlmin"), 10) || 2)) },
+    nightlight: { on: $("s-nl").checked, minutes: Math.min(30, Math.max(1, parseInt(v("s-nlmin"), 10) || 2)),
+                  from: v("s-nlfrom") || "01:00", to: v("s-nlto") || "06:00" },
     aircon: { relay: v("s-acrelay"), key: $("s-ackey").value,
               units: Array.from({length: 4}, (_, k) => ({ name: v(`s-acn${k}`), id: v(`s-aci${k}`) })).filter(u => u.id) },
     saver: { on: $("s-sv").checked, minutes: Math.min(120, Math.max(1, parseInt(v("s-svmin"), 10) || 10)) },

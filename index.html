@@ -62,6 +62,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .warns:empty{display:none}
 .warn{font-weight:600;font-size:16px;padding:6px 12px;border-radius:6px;background:#F2A93B;color:#1b1206}
 .warn.red{background:#E0463C;color:#fff}
+button.warn{border:0;font-family:var(--font);cursor:pointer;touch-action:manipulation;min-height:36px}
+button.warn:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+button.warn span{opacity:.7}
+#warnOverlay{z-index:12}
+.warn-card2{background:var(--panel);border-radius:12px;border-left:6px solid #F2A93B;padding:14px 18px;margin-bottom:10px}
+.warn-card2.red{border-left-color:#E0463C}
+.warn-card2 h3{font-size:22px;font-weight:600;margin-bottom:2px}
+.warn-card2 .wmeta{font-size:14px;color:var(--muted);margin-bottom:10px}
+.warn-card2 p{font-size:18px;line-height:1.55;max-width:70ch}
+.warn-card2 p + p{margin-top:8px}
+.warn-card2 .sub{color:var(--muted);font-size:16px}
 
 .main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,.85fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:10px;min-height:0}
 .col{background:var(--panel);border-radius:12px;padding:10px 14px;min-height:0;display:flex;flex-direction:column}
@@ -101,6 +112,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .btn:active{background:var(--line)}
 .btn.primary{background:var(--plate);color:var(--plate-ink);border-color:var(--plate)}
 .btn:focus-visible,.link:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--plate);outline-offset:2px}
+.ac-group{display:contents}
+.bottom .btn{white-space:nowrap}
+@media (max-width:1100px){ .bottom{gap:6px} .bottom .btn{padding:8px 11px;font-size:15px} .updated{display:none} }
+.btn.ac{display:inline-flex;align-items:center;gap:8px}
+.btn.ac .dot{width:10px;height:10px;border-radius:50%;background:var(--line);flex:none}
+.btn.ac.on{border-color:var(--soon)}
+.btn.ac.on .dot{background:var(--soon);box-shadow:0 0 0 3px color-mix(in srgb, var(--soon) 25%, transparent)}
+.btn.ac.busy{opacity:.6}
+.btn.ac.unknown .dot{background:transparent;border:2px dashed var(--muted)}
+.ac-units .rt{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 44px}
 .updated{margin-left:auto;font-size:13px;color:var(--muted)}
 
 /* overlays */
@@ -185,6 +206,23 @@ input,select{font:500 16px var(--font);color:var(--text);background:var(--field)
 .sv-wx{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--display);font-size:clamp(28px,6vh,48px);font-weight:600;opacity:.85;margin-top:10px}
 .sv-wx img{width:clamp(40px,8vh,64px);height:clamp(40px,8vh,64px)}
 @media (prefers-reduced-motion:reduce){#saver,.sv-inner{transition:none}}
+.pick-btn{font:500 16px var(--font);color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 32px 8px 10px;min-height:40px;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.pick-btn:disabled{opacity:.55;cursor:default}
+.pick-btn:focus-visible{outline:3px solid var(--plate);outline-offset:2px}
+select.searchable{display:none}
+.overlay.picker{z-index:30}
+#pkSearch{font-size:18px;min-height:48px;margin-bottom:10px}
+.pk-list{flex:1;overflow:auto;background:var(--panel);border-radius:12px}
+.pk-list button{display:block;width:100%;text-align:left;font:500 17px var(--font);color:var(--text);background:none;border:0;border-top:1px solid var(--line);padding:12px 14px;min-height:48px;cursor:pointer}
+.pk-list button:first-child{border-top:0}
+.pk-list button:active,.pk-list button:focus-visible{background:var(--line);outline:none}
+.pk-list button[aria-selected="true"]{color:var(--soon);font-weight:600}
+.pk-list .msg{padding:14px}
+#nightlight{position:fixed;inset:0;z-index:25;background:radial-gradient(ellipse at 50% 55%, #FFB45C 0%, #E07A2E 45%, #6B3312 100%);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6vh;opacity:0;transition:opacity 1.5s;touch-action:manipulation;cursor:pointer}
+#nightlight[hidden]{display:none}
+#nightlight.on{opacity:1}
+.nl-time{font-family:var(--display);font-weight:600;font-size:clamp(40px,9vh,80px);color:rgba(60,25,5,.75);font-variant-numeric:tabular-nums}
 #dim{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity 1.5s;z-index:20}
 body.night #dim{opacity:.65;pointer-events:auto}
 
@@ -231,7 +269,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
   </main>
 
   <footer class="bottom">
-    <button class="btn" id="btn-ac">Aircon</button>
+    <span class="ac-group" id="acGroup"><button class="btn" id="btn-ac">Aircon</button></span>
     <button class="btn" id="btn-door">Doorbell</button>
     <button class="btn" id="btn-refresh">Refresh</button>
     <button class="btn" id="btn-settings">Settings</button>
@@ -300,6 +338,15 @@ body.night #dim{opacity:.65;pointer-events:auto}
   <div class="hol-body" id="holBody"></div>
 </div>
 
+<!-- Warning details -->
+<div class="overlay" id="warnOverlay" role="dialog" aria-label="Weather warnings">
+  <div class="ov-head">
+    <h2>Weather warnings</h2>
+    <button class="btn" id="warnClose">Close</button>
+  </div>
+  <div class="set-body" id="warnBody"></div>
+</div>
+
 <!-- Weather details -->
 <div class="overlay" id="wxOverlay" role="dialog" aria-label="Weather details">
   <div class="ov-head">
@@ -327,6 +374,17 @@ body.night #dim{opacity:.65;pointer-events:auto}
     <div class="sv-wx" id="svWx"></div>
   </div>
 </div>
+<div class="overlay picker" id="picker" role="dialog" aria-label="Choose an option">
+  <div class="ov-head">
+    <h2 id="pkTitle">Choose</h2>
+    <button class="btn" id="pkClose">Cancel</button>
+  </div>
+  <input id="pkSearch" type="search" placeholder="Type to search" autocomplete="off" aria-label="Search">
+  <div class="pk-list" id="pkList" role="listbox"></div>
+</div>
+<div id="nightlight" role="button" aria-label="Night light. Tap to turn it off" hidden>
+  <div class="nl-time" id="nlTime"></div>
+</div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="dim"></div>
 
@@ -338,7 +396,9 @@ const DEFAULTS = {
   theme: "sun",                                    // dark | light | sun (sunrise/sunset) | custom
   themeCustom: { light: "07:00", dark: "19:00" },
   nightDim: { on: true, from: "23:30", to: "06:30" },
-  saver: { on: true, minutes: 10 },       // clock screensaver after this many idle minutes
+  saver: { on: true, minutes: 10 },
+  nightlight: { on: true, minutes: 2 },
+  aircon: { relay: "", key: "", units: [] },            // units: [{ name, id }] — filled in on the tablet               // warm glow when Fully PLUS detects motion at night       // clock screensaver after this many idle minutes
   weather: { station: "Happy Valley", label: "Wan Chai", rainDistrict: "Wan Chai" },
   mtr: [ { line: "ISL", sta: "WAC", dir: "both" }, { line: "EAL", sta: "EXC", dir: "both" } ],
   panels: [
@@ -505,6 +565,108 @@ function saverTick(){
 }
 setInterval(saverTick, 15000);
 
+/* ---- searchable picker for long dropdowns ---- */
+const selValue = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
+function syncPick(sel){
+  const b = sel._pick; if (!b) return;
+  const o = sel.selectedOptions[0];
+  b.textContent = o && o.value !== "" ? o.text : (o?.text || sel.getAttribute("aria-label") || "Choose");
+  b.disabled = sel.disabled || sel.options.length === 0;
+}
+function enhanceSelects(root){
+  root.querySelectorAll("select.searchable").forEach(sel => {
+    if (sel._pick) return syncPick(sel);
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "pick-btn";
+    b.setAttribute("aria-label", sel.getAttribute("aria-label") || "Choose");
+    b.onclick = () => openPicker(sel);
+    sel.after(b); sel._pick = b;
+    Object.defineProperty(sel, "value", { configurable: true,           // keep the button label in step with the dropdown
+      get(){ return selValue.get.call(this); }, set(v){ selValue.set.call(this, v); syncPick(this); } });
+    new MutationObserver(() => syncPick(sel)).observe(sel, { childList: true, attributes: true, attributeFilter: ["disabled"] });
+    syncPick(sel);
+  });
+}
+let pkSel = null;
+function openPicker(sel){
+  pkSel = sel;
+  const t = (sel.getAttribute("aria-label") || "Choose").replace(/^Panel \d+ /, "").replace(/ \d+$/, "");
+  $("pkTitle").textContent = "Choose a " + t.toLowerCase();
+  $("pkSearch").value = "";
+  renderPicker();
+  $("picker").classList.add("open");
+  setTimeout(() => $("pkSearch").focus(), 50);
+}
+function renderPicker(){
+  const q = norm($("pkSearch").value), terms = q.split(" ").filter(Boolean);
+  const opts = [...pkSel.options].filter(o => o.value !== "" || o.text === "None");
+  const scored = [];
+  for (const o of opts){
+    const t = norm(o.text.replace(/^\d+\.\s*/, ""));
+    if (terms.length && !terms.every(w => t.includes(w))) continue;
+    const score = !q ? 0 : t === q || t.split(" ")[0] === q ? 0 : t.startsWith(q) ? 1 : t.split(" ").some(w => w.startsWith(terms[0])) ? 2 : 3;
+    scored.push([score, o]);
+  }
+  if (q) scored.sort((a,b) => a[0] - b[0]);
+  const shown = scored.slice(0, 200);
+  $("pkList").innerHTML = shown.length
+    ? shown.map(([, o]) => `<button role="option" data-v="${esc(o.value)}" aria-selected="${o.value === pkSel.value}">${esc(o.text)}</button>`).join("") +
+      (scored.length > shown.length ? `<div class="msg">Showing the first 200. Type more to narrow it down.</div>` : "")
+    : `<div class="msg">Nothing matches "${esc($("pkSearch").value)}".</div>`;
+}
+$("pkSearch").addEventListener("input", renderPicker);
+$("pkSearch").addEventListener("keydown", e => {
+  if (e.key === "Enter"){ e.preventDefault(); const f = $("pkList").querySelector("button"); if (f) f.click(); }
+  if (e.key === "Escape"){ e.preventDefault(); $("pkClose").click(); }
+});
+$("pkList").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || !pkSel) return;
+  pkSel.value = b.dataset.v;
+  pkSel.dispatchEvent(new Event("change", { bubbles: true }));
+  const btn = pkSel._pick; $("picker").classList.remove("open"); pkSel = null;
+  setTimeout(() => btn?.focus({ preventScroll: true }), 0);
+});
+$("pkClose").onclick = () => { $("picker").classList.remove("open"); pkSel?._pick?.focus(); pkSel = null; };
+
+/* ---- motion (Fully PLUS) and night light ---- */
+function isNightHours(){
+  const d = new Date(), mins = d.getHours()*60 + d.getMinutes();
+  const toM = s => { const [a,b] = String(s).split(":").map(Number); return a*60 + b; };
+  const f = toM(S.nightDim.from), t = toM(S.nightDim.to);
+  return f > t ? (mins >= f || mins < t) : (mins >= f && mins < t);
+}
+let nlTimer = null, nlOn = false, nlBrightness = null;
+const hasFully = fn => window.fully && typeof fully[fn] === "function";
+function nlClock(){
+  const d = new Date(); let h = d.getHours(), m = String(d.getMinutes()).padStart(2,"0");
+  $("nlTime").textContent = S.clock24h ? `${String(h).padStart(2,"0")}:${m}` : `${h % 12 || 12}:${m}`;
+}
+function showNightlight(){
+  const el = $("nightlight");
+  nlClock();
+  if (!nlOn){
+    nlOn = true; el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
+    try { if (hasFully("getScreenBrightness")) nlBrightness = fully.getScreenBrightness(); if (hasFully("setScreenBrightness")) fully.setScreenBrightness(200); } catch {}
+  }
+  clearTimeout(nlTimer);                                   // more motion keeps it on
+  nlTimer = setTimeout(hideNightlight, Math.max(1, Number(S.nightlight?.minutes) || 2) * 60000);
+}
+function hideNightlight(){
+  if (!nlOn) return;
+  nlOn = false; clearTimeout(nlTimer);
+  const el = $("nightlight"); el.classList.remove("on");
+  setTimeout(() => { if (!nlOn) el.hidden = true; }, 1600);
+  try { if (nlBrightness != null && hasFully("setScreenBrightness")) fully.setScreenBrightness(nlBrightness); } catch {}
+  nlBrightness = null;
+}
+$("nightlight").addEventListener("pointerup", e => { e.preventDefault(); e.stopPropagation(); hideNightlight(); });
+$("nightlight").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); });
+window.__dashMotion = () => {
+  if (S.nightlight?.on && isNightHours()){ lastTouch = Date.now(); showNightlight(); }
+  else { lastTouch = Date.now(); hideSaver(); undimUntil = Date.now() + 60000; document.body.classList.remove("night"); }
+};
+if (hasFully("bind")) { try { fully.bind("onMotion", "window.__dashMotion && window.__dashMotion()"); } catch {} }
+
 /* ---- clock + night dim ---- */
 let undimUntil = 0;
 function tick(){
@@ -521,6 +683,45 @@ function tick(){
   if (!undimUntil || Date.now() > undimUntil) document.body.classList.toggle("night", night);
 }
 $("dim").addEventListener("click", () => { undimUntil = Date.now() + 60000; document.body.classList.remove("night"); });
+
+/* ---- weather warnings: names and details ---- */
+const WARN_NAMES = { WRAINA:"Amber rainstorm", WRAINR:"Red rainstorm", WRAINB:"Black rainstorm",
+  WFIREY:"Yellow fire danger", WFIRER:"Red fire danger", WHOT:"Very hot weather warning", WCOLD:"Cold weather warning",
+  WFROST:"Frost warning", WTS:"Thunderstorm warning", WL:"Landslip warning", WMSGNL:"Strong monsoon signal",
+  WFNTSA:"Flooding in the northern New Territories", WTMW:"Tsunami warning" };
+function warnLabel(x){
+  const c = x.code || "";
+  if (/^TC\d/.test(c)) return `Typhoon signal No. ${c.slice(2).replace(/(\d+)(\D*)/, "$1 $2").trim()}`;
+  return WARN_NAMES[c] || x.name || c;
+}
+const warnSevere = x => /^(TC(8|9|10)|WRAINR|WRAINB|WFIRER|WTMW)/.test(x.code || "");
+async function openWarning(key){
+  $("warnOverlay").classList.add("open");
+  const warn = wxLatest?.warn || {};
+  const entries = Object.entries(warn).filter(([, x]) => x && x.actionCode !== "CANCEL");
+  if (!entries.length){ $("warnBody").innerHTML = `<div class="msg">No warnings are in force right now.</div>`; return; }
+  $("warnBody").innerHTML = `<div class="msg">Loading the Observatory's details…</div>`;
+  let info = null;
+  try { info = await getJSON(`${HKO}?dataType=warningInfo&lang=en`); } catch {}
+  const details = info?.details || [];
+  const when = t => t ? new Date(t).toLocaleString("en-GB", { hour: "numeric", minute: "2-digit", day: "numeric", month: "short", hour12: !S.clock24h, timeZone: "Asia/Hong_Kong" }) : "";
+  // tapped warning first, then any others in force
+  entries.sort((a, b) => (b[0] === key) - (a[0] === key));
+  $("warnBody").innerHTML = entries.map(([k, x]) => {
+    const d = details.find(z => z.warningStatementCode === k) || details.find(z => z.subtype && z.subtype === x.code);
+    const paras = (d?.contents || []).filter(Boolean);
+    return `<article class="warn-card2 ${warnSevere(x) ? "red" : ""}">
+      <h3>${esc(warnLabel(x))}</h3>
+      <div class="wmeta">${x.issueTime ? "Issued " + esc(when(x.issueTime)) : ""}${x.updateTime && x.updateTime !== x.issueTime ? ", updated " + esc(when(x.updateTime)) : ""}</div>
+      ${paras.length ? paras.map(t => `<p>${esc(t)}</p>`).join("") : `<p class="sub">The Observatory's full statement isn't available right now. Try again in a minute.</p>`}
+    </article>`;
+  }).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".warn[data-k]");
+  if (b){ e.stopPropagation(); openWarning(b.dataset.k); }
+});
+$("warnClose").onclick = () => $("warnOverlay").classList.remove("open");
 
 /* ---- weather ---- */
 let wxLatest = null;
@@ -555,15 +756,8 @@ async function loadWeather(){
     const icon = now.icon?.[0];
     if (icon){ $("wxicon").src = `https://www.hko.gov.hk/images/HKOWxIconOutline/pic${icon}.png`; $("wxicon").hidden = false; }
 
-    const w = Object.values(warn || {}).filter(x => x && x.actionCode !== "CANCEL");
-    const label = x => {
-      const c = x.code || "";
-      if (/^TC\d/.test(c)) return `Typhoon signal No. ${c.slice(2).replace(/(\d+)(\D*)/, "$1 $2").trim()}`;
-      return ({ WRAINA:"Amber rainstorm", WRAINR:"Red rainstorm", WRAINB:"Black rainstorm",
-                WHOT:"Very hot weather warning", WCOLD:"Cold weather warning" })[c] || x.name || c;
-    };
-    const severe = x => /^(TC(8|9|10)|WRAINR|WRAINB)/.test(x.code || "");
-    $("warns").innerHTML = w.map(x => `<div class="warn ${severe(x) ? "red" : ""}">${esc(label(x))}</div>`).join("");
+    const w = Object.entries(warn || {}).filter(([, x]) => x && x.actionCode !== "CANCEL");
+    $("warns").innerHTML = w.map(([k, x]) => `<button class="warn ${warnSevere(x) ? "red" : ""}" data-k="${esc(k)}" aria-label="${esc(warnLabel(x))}, show details">${esc(warnLabel(x))}<span aria-hidden="true"> ›</span></button>`).join("");
   } catch {
     $("wxsub").textContent = "Weather unavailable. Retrying soon.";
   }
@@ -758,6 +952,7 @@ const PSR_LEVEL = { "low": 1, "medium low": 2, "medium": 3, "medium high": 4, "h
 const rainBar = psr => { const n = PSR_LEVEL[String(psr || "").toLowerCase()] || 0;
   return `<span class="rainbar" role="img" aria-label="Chance of rain: ${esc(psr || "unknown")}">${[1,2,3,4,5].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>`; };
 const dayName = ymd => {
+  if (!ymd) return "";
   const d = new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}T12:00:00+08:00`);
   const tmr = new Date(Date.now() + 8*3600000 + 86400000).toISOString().slice(0,10).replace(/-/g,"");
   return ymd === tmr ? "Tomorrow" : d.toLocaleDateString("en-GB", { weekday: "short", timeZone: "Asia/Hong_Kong" });
@@ -921,7 +1116,7 @@ function mtrRow(st){
   const row = document.createElement("div");
   row.className = "rt";
   row.innerHTML = `<select class="m-line" aria-label="Line"><option value="">Choose a line</option>${Object.entries(MTR_LINES).map(([k,v]) => `<option value="${k}">${esc(v.name)}</option>`).join("")}</select>
-    <select class="m-sta" aria-label="Station" disabled></select>
+    <select class="m-sta searchable" aria-label="Station" disabled></select>
     <select class="m-dir" aria-label="Direction" disabled></select>
     <button class="rm" aria-label="Remove this station">×</button>`;
   const lineSel = row.querySelector(".m-line"), staSel = row.querySelector(".m-sta"), dirSel = row.querySelector(".m-dir");
@@ -950,6 +1145,7 @@ function mtrRow(st){
   lineSel.onchange = () => fillSta(null);
   staSel.onchange = () => fillDir(null);
   row.querySelector(".rm").onclick = () => { row.remove(); mtrCount(); };
+  enhanceSelects(row);
   if (st){ lineSel.value = st.line; fillSta(st.sta); }
   $("mtr-edit-rows").appendChild(row);
   mtrCount();
@@ -1031,6 +1227,22 @@ function renderSettings(src){
       <label class="field">Dim until<input type="time" id="s-dimto" value="${esc(src.nightDim.to)}"></label>
     </div>
   </section>
+  <section class="ac-units">
+    <h3>Aircon buttons</h3>
+    <p class="hint">Needs your Tuya relay on Cloudflare. Paste its link and the password you set as DASH_KEY, then add each aircon's name and Tuya device ID. These stay on this tablet only. Leave the link blank to keep the single button that opens Smart Life.</p>
+    <div class="fields">
+      <label class="field">Relay link<input id="s-acrelay" type="url" value="${esc(src.aircon?.relay || "")}" placeholder="https://aircon-relay.yourname.workers.dev"></label>
+      <label class="field">Relay password<input id="s-ackey" type="password" value="${esc(src.aircon?.key || "")}" autocomplete="off"></label>
+    </div>
+    <div class="rt rt-head" style="margin-top:10px"><span>Name on the button</span><span>Tuya device ID</span><span></span></div>
+    ${Array.from({length: 4}, (_, k) => { const u = src.aircon?.units?.[k] || {}; return `
+    <div class="rt">
+      <input id="s-acn${k}" value="${esc(u.name || "")}" placeholder="${["Living room","Bedroom","Study","Other"][k]}" aria-label="Aircon ${k+1} name">
+      <input id="s-aci${k}" value="${esc(u.id || "")}" placeholder="Device ID" aria-label="Aircon ${k+1} device ID" autocapitalize="off" spellcheck="false">
+      <span></span>
+    </div>`; }).join("")}
+    <div class="pe-actions"><button class="btn" id="s-actest" type="button">Test connection</button><span class="set-status" id="s-acstatus" data-err="1"></span></div>
+  </section>
   <section>
     <h3>Screensaver</h3>
     <p class="hint">After a while without a tap, the screen fades to a big clock with the date and temperature. Tap anywhere to return.</p>
@@ -1040,12 +1252,20 @@ function renderSettings(src){
     </div>
   </section>
   <section>
+    <h3>Night light</h3>
+    <p class="hint">Needs Fully Kiosk PLUS with motion detection turned on. During your night dimming hours, walking past turns the screen into a warm glow, then it fades back after the time below. At other times, motion just wakes the dashboard.</p>
+    <div class="fields">
+      <label class="field check"><input type="checkbox" id="s-nl" ${src.nightlight?.on ? "checked" : ""}> Glow when motion is detected at night</label>
+      <label class="field">Stay on for (minutes)<input type="number" id="s-nlmin" min="1" max="30" value="${esc(src.nightlight?.minutes ?? 2)}"></label>
+    </div>
+  </section>
+  <section>
     <h3>Weather</h3>
     <p class="hint">Temperature comes from the Hong Kong Observatory station you pick. The name shown is what appears on screen, so you can call Happy Valley "Wan Chai", for example.</p>
     <div class="fields">
-      <label class="field">Temperature station<select id="s-station">${opts(stations, src.weather.station)}</select></label>
+      <label class="field">Temperature station<select id="s-station" class="searchable" aria-label="Temperature station">${opts(stations, src.weather.station)}</select></label>
       <label class="field">Name shown<input id="s-label" value="${esc(src.weather.label)}" placeholder="Same as station"></label>
-      <label class="field">Rainfall district<select id="s-rain">${opts(districts, src.weather.rainDistrict)}</select></label>
+      <label class="field">Rainfall district<select id="s-rain" class="searchable" aria-label="Rainfall district">${opts(districts, src.weather.rainDistrict)}</select></label>
     </div>
   </section>
   <section>
@@ -1061,13 +1281,32 @@ function renderSettings(src){
         <div class="rt rt-head"><span>Route</span><span>Direction</span><span>Stop</span></div>
         ${Array.from({length: MAX_ROUTES}, (_, k) => `
         <div class="rt" id="s-p${i}-row${k}">
-          <select class="r-route" aria-label="Panel ${i+1} route ${k+1}"></select>
+          <select class="r-route searchable" aria-label="Panel ${i+1} route ${k+1}"></select>
           <select class="r-dir" aria-label="Panel ${i+1} direction ${k+1}" disabled></select>
-          <select class="r-stop" aria-label="Panel ${i+1} stop ${k+1}" disabled></select>
+          <select class="r-stop searchable" aria-label="Panel ${i+1} stop ${k+1}" disabled></select>
         </div>`).join("")}
       </div>`).join("")}
     <div class="set-status" id="s-status"></div>
   </section>`;
+  enhanceSelects($("setBody"));
+  $("s-actest").onclick = async () => {
+    const st = $("s-acstatus"), keep = S.aircon;
+    S.aircon = readSettings().aircon;
+    if (!S.aircon.relay || !S.aircon.key){ st.textContent = "Add the relay link and password first."; S.aircon = keep; return; }
+    st.textContent = "Testing…";
+    try {
+      const p = await acFetch("/ping");
+      const ids = S.aircon.units.map(u => u.id);
+      let msg = `Connected to Tuya. The relay allows ${p.devices} device${p.devices === 1 ? "" : "s"}.`;
+      if (ids.length){
+        const j = await acFetch(`/status?ids=${ids.map(encodeURIComponent).join(",")}`);
+        msg += " " + S.aircon.units.map(u => { const d = j.devices?.[u.id];
+          return `${u.name || u.id}: ${!d ? "not in the relay's DEVICES list" : d.error ? d.error : d.on == null ? "no switch found" : d.on ? "on" : "off"}`; }).join(", ") + ".";
+      }
+      st.textContent = msg;
+    } catch (e) { st.textContent = "Couldn't connect: " + e.message; }
+    S.aircon = keep;
+  };
 }
 function readSettings(){
   const v = id => $(id).value.trim();
@@ -1077,6 +1316,9 @@ function readSettings(){
     theme: v("s-theme"),
     themeCustom: { light: v("s-light") || "07:00", dark: v("s-dark") || "19:00" },
     nightDim: { on: $("s-dim").checked, from: v("s-dimfrom") || "23:30", to: v("s-dimto") || "06:30" },
+    nightlight: { on: $("s-nl").checked, minutes: Math.min(30, Math.max(1, parseInt(v("s-nlmin"), 10) || 2)) },
+    aircon: { relay: v("s-acrelay"), key: $("s-ackey").value,
+              units: Array.from({length: 4}, (_, k) => ({ name: v(`s-acn${k}`), id: v(`s-aci${k}`) })).filter(u => u.id) },
     saver: { on: $("s-sv").checked, minutes: Math.min(120, Math.max(1, parseInt(v("s-svmin"), 10) || 10)) },
     weather: { station: v("s-station"), label: v("s-label"), rainDistrict: v("s-rain") },
     panels: Array.from({length: MAX_PANELS}, (_, i) => ({
@@ -1162,12 +1404,13 @@ let peIndex = -1, peRoutes = [], peByKey = {};
 function peRow(r){
   const row = document.createElement("div");
   row.className = "rt";
-  row.innerHTML = `<select class="r-route" aria-label="Route"></select>
+  row.innerHTML = `<select class="r-route searchable" aria-label="Route"></select>
     <select class="r-dir" aria-label="Direction" disabled></select>
-    <select class="r-stop" aria-label="Stop" disabled></select>
+    <select class="r-stop searchable" aria-label="Stop" disabled></select>
     <button class="rm" aria-label="Remove this route">×</button>`;
   row.querySelector(".rm").onclick = () => { row.remove(); peCount(); };
   $("pe-rows").appendChild(row);
+  enhanceSelects(row);
   setupRow(row, peRoutes, peByKey, r);
   peCount();
   return row;
@@ -1215,6 +1458,67 @@ $("setSave").onclick = () => {
   location.reload();
 };
 
+/* ---- aircon buttons through the Tuya relay ---- */
+const AC = () => S.aircon || {};
+const acReady = () => AC().relay && AC().key && (AC().units || []).some(u => u.id);
+const acState = {};                                   // id -> true / false / null
+async function acFetch(path, opts = {}){
+  const base = AC().relay.trim().replace(/\/+$/, "");
+  const r = await fetch(base + path, { ...opts, headers: { "X-Key": AC().key, "Content-Type": "application/json", ...(opts.headers || {}) } });
+  const j = await r.json().catch(() => ({ ok: false, error: `Relay replied with HTTP ${r.status}` }));
+  if (!j.ok) throw new Error(j.error || "The relay didn't accept the request.");
+  return j;
+}
+function buildAcButtons(){
+  const g = $("acGroup");
+  if (!acReady()){ g.innerHTML = `<button class="btn" id="btn-ac">Aircon</button>`; $("btn-ac").onclick = () => openApp(APPS.aircon, "Smart Life"); return; }
+  const units = AC().units.filter(u => u.id);
+  g.innerHTML = units.map((u, i) => `<button class="btn ac unknown" data-i="${i}" aria-pressed="false"><span class="dot"></span><span class="nm">${esc(u.name || "Aircon " + (i+1))}</span></button>`).join("") +
+    (units.length > 1 ? `<button class="btn" id="btn-acoff">All off</button>` : "");
+  g.querySelectorAll(".btn.ac").forEach(b => b.onclick = () => acToggle(units[+b.dataset.i]));
+  const off = $("btn-acoff"); if (off) off.onclick = acAllOff;
+  paintAc();
+}
+function paintAc(){
+  const units = (AC().units || []).filter(u => u.id);
+  $("acGroup").querySelectorAll(".btn.ac").forEach(b => {
+    const u = units[+b.dataset.i], v = acState[u.id];
+    b.classList.toggle("on", v === true); b.classList.toggle("unknown", v == null);
+    b.setAttribute("aria-pressed", v === true);
+    b.setAttribute("aria-label", `${u.name || "Aircon"}: ${v === true ? "on" : v === false ? "off" : "status unknown"}. Tap to turn ${v === true ? "off" : "on"}.`);
+  });
+}
+async function acRefresh(){
+  if (!acReady()) return;
+  const ids = AC().units.filter(u => u.id).map(u => u.id);
+  try {
+    const j = await acFetch(`/status?ids=${ids.map(encodeURIComponent).join(",")}`);
+    for (const id of ids) acState[id] = j.devices?.[id]?.on ?? null;
+  } catch { for (const id of ids) acState[id] = null; }
+  paintAc();
+}
+async function acSet(u, on){
+  const b = $("acGroup").querySelector(`.btn.ac[data-i="${AC().units.filter(x => x.id).indexOf(u)}"]`);
+  const before = acState[u.id];
+  acState[u.id] = on; paintAc(); b?.classList.add("busy");
+  try { await acFetch("/set", { method: "POST", body: JSON.stringify({ id: u.id, on }) }); return true; }
+  catch (e) { acState[u.id] = before; paintAc(); toast(`${u.name || "Aircon"}: ${e.message}`); return false; }
+  finally { b?.classList.remove("busy"); }
+}
+async function acToggle(u){
+  const ok = await acSet(u, acState[u.id] !== true);
+  if (ok){ toast(`${u.name || "Aircon"} turned ${acState[u.id] ? "on" : "off"}`); setTimeout(acRefresh, 5000); }
+}
+async function acAllOff(){
+  const units = AC().units.filter(u => u.id);
+  const b = $("btn-acoff"); b.disabled = true; b.textContent = "Turning off…";
+  const results = [];
+  for (const u of units) results.push(await acSet(u, false));
+  b.disabled = false; b.textContent = "All off";
+  if (results.every(Boolean)) toast("All aircons turned off");
+  setTimeout(acRefresh, 5000);
+}
+
 /* ---- app buttons (Fully Kiosk Browser) ---- */
 function openApp(pkg, name){
   let tried = "";
@@ -1232,14 +1536,14 @@ function openApp(pkg, name){
                        : `To open ${name}, turn on "Enable JavaScript Interface" in Fully's Advanced Web Settings.`);
   }, 2000);
 }
-$("btn-ac").onclick = () => openApp(APPS.aircon, "Smart Life");
+buildAcButtons(); acRefresh(); setInterval(acRefresh, 5*60000);
 $("btn-door").onclick = () => openApp(APPS.doorbell, "Xiaomi Home");
 $("btn-refresh").onclick = async () => {
   const b = $("btn-refresh");
   if (b.disabled) return;
   b.disabled = true; b.textContent = "Refreshing…";
   loadCalendar();
-  await Promise.allSettled([loadWeather(), loadBuses(), loadMTR()]);
+  await Promise.allSettled([loadWeather(), loadBuses(), loadMTR(), acRefresh()]);
   b.textContent = "Refreshed";
   setTimeout(() => { b.textContent = "Refresh"; b.disabled = false; }, 1500);
 };

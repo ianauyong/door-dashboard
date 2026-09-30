@@ -14,6 +14,9 @@
   --font:"Barlow",system-ui,sans-serif;
   --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
 }
+:root[data-theme="dark"][data-warm]{
+  --bg:#17110C; --panel:#221912; --line:#3A2A1D; --text:#F2E4D3; --muted:#C2A98E; --soon:#B8C98A; --amber:#F2994A; --field:#1B140E;
+}
 :root[data-theme="light"]{
   --bg:#E6ECF1; --panel:#FFFFFF; --line:#D2DBE3; --text:#15212D; --muted:#4C5C6C;
   --soon:#16804B; --amber:#B86E00; --red:#C8322A; --field:#F3F6F9;
@@ -180,6 +183,7 @@ textarea{font:500 15px ui-monospace,Menlo,Consolas,monospace;color:var(--text);b
 .cal-tmr b{display:block;color:var(--text);font-size:14px;margin-bottom:2px}
 .cal-tmr div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stale .cal-list{opacity:.4;filter:grayscale(1)}
+#evOverlay{z-index:13}
 .ev-cal{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted)}
 .ev-cal i{width:12px;height:12px;border-radius:50%;flex:none}
 .ev-when{font-size:20px;margin:8px 0 14px}
@@ -191,6 +195,82 @@ textarea{font:500 15px ui-monospace,Menlo,Consolas,monospace;color:var(--text);b
 .ag-list{background:var(--panel);border-radius:12px;padding:2px 14px}
 .ce-cal{display:grid;grid-template-columns:auto minmax(0,1fr) 170px;gap:10px;align-items:center;margin-top:8px}
 .ce-err{grid-column:1/-1;font-size:14px;color:var(--amber);margin-top:-4px}
+.clockcol{display:flex;flex-direction:column;min-width:0}
+.subrow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-top:6px}
+.subrow .date{margin-top:0}
+#tz2{font-size:18px;font-weight:600;color:var(--muted);padding:8px 8px;margin:-8px 0;border-radius:8px;cursor:pointer;touch-action:manipulation;white-space:nowrap}
+#tz2::before{content:"";display:inline-block;width:1px;height:14px;background:var(--line);margin-right:12px;vertical-align:-1px}
+#tz2:active{background:var(--line)}
+#tz2:focus-visible{outline:3px solid var(--plate)}
+#tz2[hidden]{display:none}
+.sv-tz{font-size:clamp(16px,3vh,24px);opacity:.55;margin-top:8px}
+.sv-tz:empty{display:none}
+.tz-big{font-family:var(--display);font-size:64px;font-weight:600;line-height:1}
+.tz-sub{font-size:18px;color:var(--muted);margin-top:6px}
+.tz-note{font-size:16px;margin-top:12px;max-width:70ch}
+.tz-grid{display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:6px 20px;font-size:17px}
+.tz-grid b{font-size:14px;color:var(--muted);font-weight:600}
+.etas .n.next.soon,.bd-t.soon b{color:var(--amber)}
+.cev.soon .when{color:var(--amber)}
+.cev.soon{background:color-mix(in srgb, var(--amber) 14%, transparent);border-radius:8px;border-top-color:transparent;padding:9px 8px;margin:0 -8px}
+.cev.soon + .cev{border-top-color:transparent}
+.btn .ic{width:20px;height:20px;flex:none}
+.ic-btn{display:inline-flex;align-items:center;gap:8px}
+.btn.ac .ic{color:var(--muted)}
+.btn.ac.on .ic{color:var(--soon)}
+.btn.ac.unknown .ic{opacity:.5}
+.btn.pulse{animation:pulse .45s ease-out}
+@keyframes pulse{0%{transform:scale(1);box-shadow:0 0 0 0 color-mix(in srgb, var(--soon) 55%, transparent)}40%{transform:scale(.96)}100%{transform:scale(1);box-shadow:0 0 0 12px transparent}}
+@media (prefers-reduced-motion:reduce){.btn.pulse{animation:none}}
+html[data-text="large"] .col .where{font-size:16px}
+html[data-text="large"] .dest{font-size:clamp(15px,2.6vh,19px)}
+html[data-text="large"] .mtr .stn{font-size:16px}
+html[data-text="large"] .mtr .to{font-size:18px}
+html[data-text="large"] .mtr .t{font-size:23px}
+html[data-text="large"] .cev .ttl{font-size:clamp(17px,2.6vh,21px)}
+html[data-text="large"] .cev .sub,html[data-text="large"] .cal-tmr,html[data-text="large"] .cal-tmr b,html[data-text="large"] .cal-more{font-size:16px}
+html[data-text="large"] .cev .when small{font-size:15px}
+html[data-text="large"] .bottom .btn{font-size:18px}
+html[data-text="large"] .updated,html[data-text="large"] .conn{font-size:16px}
+html[data-text="large"] .date{font-size:20px}
+html[data-text="large"] #tz2{font-size:20px}
+html[data-text="large"] .wx-sub{font-size:17px}
+html[data-text="large"] .hol .d{font-size:17px}
+html[data-text="large"] .msg{font-size:16px}
+html[data-text="large"] .col h2{font-size:18px}
+#tour{position:fixed;inset:0;z-index:40}
+#tour[hidden]{display:none}
+#tourSpot{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.66);outline:3px solid var(--plate);transition:all .25s ease;pointer-events:none}
+#tourCard{position:fixed;width:min(380px,calc(100vw - 24px));background:var(--panel);color:var(--text);border-radius:14px;padding:16px 18px;box-shadow:0 12px 40px rgba(0,0,0,.4);transition:left .25s ease,top .25s ease}
+.tc-step{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}
+#tourCard h3{font-size:20px;font-weight:600;margin-bottom:6px}
+#tourCard p{font-size:16px;line-height:1.5}
+.tc-keys:not(:empty){margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.tc-btns{display:flex;gap:8px;margin-top:14px;align-items:center}
+.tc-btns span{flex:1}
+#tourOffer{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:35;display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:calc(100vw - 24px)}
+#tourOffer[hidden]{display:none}
+#tourOffer span{font-size:16px;margin-right:6px}
+@media (prefers-reduced-motion:reduce){#tourSpot,#tourCard{transition:none}}
+.help-list{display:grid;gap:10px}
+.help-list div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;font-size:17px;line-height:1.45}
+.help-list b{font-weight:600}
+.key-sample{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.key-sample > *{flex:none}
+.key-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center;padding:6px 0;font-size:16px;line-height:1.45}
+.key-s.etas{font-size:30px;display:inline-block}
+.key-stale{opacity:.4;filter:grayscale(1)}
+.key-plate{display:inline-block;font-size:22px;padding:2px 8px 0;min-width:54px}
+.key-chip{display:inline-block;font-size:14px;font-weight:600;border-radius:8px;padding:5px 10px}
+.key-now{background:color-mix(in srgb, var(--soon) 18%, transparent);color:var(--soon)}
+.key-soon{background:color-mix(in srgb, var(--amber) 16%, transparent);color:var(--amber)}
+.key-bar{width:6px;height:28px;padding:0;background:#7F77DD;border-radius:3px}
+.key-conn{background:#F2A93B;color:#1b1206}
+.key-clock{background:#000;color:#F4F6F8}
+.key-warn{display:inline-block;font-size:14px;padding:4px 10px}
+.key-ac{display:inline-flex;color:var(--muted);margin-right:6px}
+.key-ac .ic{width:26px;height:26px}
+.key-ac.on{color:var(--soon)}
 .menu-wrap{position:relative;display:inline-flex}
 .menu{position:absolute;right:0;bottom:calc(100% + 8px);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:190px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:9}
 .menu button{display:block;width:100%;text-align:left;font:600 17px var(--font);color:var(--text);background:none;border:0;border-radius:8px;padding:12px 14px;min-height:48px}
@@ -329,9 +409,11 @@ body.night #dim{opacity:.65;pointer-events:auto}
 <body>
 <div class="wrap">
   <header class="top">
-    <div id="clockBox" role="button" tabindex="0" aria-label="Switch between light and dark theme">
-      <div class="clock" id="clock">--:--</div>
-      <div class="date" id="date"></div>
+    <div class="clockcol">
+      <div id="clockBox" role="button" tabindex="0" aria-label="Switch between light and dark theme">
+        <div class="clock" id="clock">--:--</div>
+      </div>
+      <div class="subrow"><div class="date" id="date"></div><div id="tz2" role="button" tabindex="0" hidden></div></div>
     </div>
     <div class="hol" id="holiday" role="button" tabindex="0" aria-label="Show public holidays"></div>
     <div class="wx" id="wxBox" role="button" tabindex="0" aria-label="Open weather details">
@@ -352,7 +434,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
         <h2>MTR</h2>
         <div id="mtr-rows"><div class="msg">Loading trains…</div></div>
       </section>
-      <section class="col cal" id="calbox" tabindex="0" role="button" aria-label="Today's calendar. Tap an event for details, tap and hold to customise.">
+      <section class="col cal" id="calbox" tabindex="0" role="button" aria-label="Today's calendar. Tap an event for details, anywhere else for the next three weeks. Tap and hold to customise.">
         <h2>Today <span class="cal-date" id="calDate"></span><button class="link" id="btn-cal">Expand</button></h2>
         <div class="cal-list" id="calList"></div>
       </section>
@@ -360,12 +442,14 @@ body.night #dim{opacity:.65;pointer-events:auto}
   </main>
 
   <footer class="bottom">
-    <span class="ac-group" id="acGroup"><button class="btn" id="btn-ac">Aircon</button></span>
-    <button class="btn" id="btn-door">Doorbell</button>
+    <span class="ac-group" id="acGroup"><button class="btn ic-btn" id="btn-ac"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5 12 6l3-2.5M9 20.5l3-2.5 3 2.5M3.3 10.1l3.9 1-1 3.8M20.7 13.9l-3.9-1 1-3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Aircon</button></span>
+    <button class="btn ic-btn" id="btn-door"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Doorbell</button>
     <span class="menu-wrap">
-      <button class="btn" id="btn-menu" aria-haspopup="true" aria-expanded="false">More</button>
+      <button class="btn ic-btn" id="btn-menu" aria-haspopup="true" aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg>More</button>
       <div class="menu" id="menu" role="menu" hidden>
         <button role="menuitem" id="btn-refresh">Refresh now</button>
+        <button role="menuitem" id="btn-help">How to use</button>
+        <button role="menuitem" id="btn-tour">Quick tour</button>
         <button role="menuitem" id="btn-settings">Settings</button>
       </div>
     </span>
@@ -375,7 +459,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
 </div>
 
 <!-- Full calendar -->
-<div class="overlay" id="calOverlay" role="dialog" aria-label="Calendar">
+<div class="overlay view" id="calOverlay" role="dialog" aria-label="Calendar">
   <div class="ov-head">
     <h2>Calendar</h2>
     <div class="seg" id="calModes">
@@ -388,13 +472,40 @@ body.night #dim{opacity:.65;pointer-events:auto}
   <iframe id="calFull" class="calframe" title="Calendar"></iframe>
 </div>
 
+<!-- How to use -->
+<div class="overlay view" id="helpOverlay" role="dialog" aria-label="How to use">
+  <div class="ov-head"><h2>How to use</h2><button class="btn" id="helpTour">Take the tour</button><button class="btn" id="helpClose">Close</button></div>
+  <div class="set-body" id="helpBody"></div>
+</div>
+<!-- Tour -->
+<div id="tour" hidden>
+  <div id="tourSpot"></div>
+  <div id="tourCard" role="dialog" aria-live="polite" aria-label="Dashboard tour">
+    <div class="tc-step" id="tourStep"></div>
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="tc-keys" id="tourKeys"></div>
+    <div class="tc-btns"><button class="btn" id="tourSkip">Skip</button><span></span><button class="btn" id="tourBack">Back</button><button class="btn primary" id="tourNext">Next</button></div>
+  </div>
+</div>
+<div id="tourOffer" hidden role="dialog" aria-label="Take the tour">
+  <span>New here, or want a refresher? Take a one-minute tour of the dashboard.</span>
+  <button class="btn" id="offerNo">Not now</button><button class="btn primary" id="offerYes">Take the tour</button>
+</div>
+
+<!-- Second clock details -->
+<div class="overlay view" id="tzOverlay" role="dialog" aria-label="Second clock">
+  <div class="ov-head"><h2 id="tzTitle">Melbourne</h2><button class="btn" id="tzEdit">Change</button><button class="btn" id="tzClose">Close</button></div>
+  <div class="set-body" id="tzBody"></div>
+</div>
+
 <!-- Calendar: one event -->
-<div class="overlay" id="evOverlay" role="dialog" aria-label="Event details">
+<div class="overlay view" id="evOverlay" role="dialog" aria-label="Event details">
   <div class="ov-head"><h2 id="evTitle">Event</h2><button class="btn" id="evClose">Close</button></div>
   <div class="set-body" id="evBody"></div>
 </div>
 <!-- Calendar: next three weeks -->
-<div class="overlay" id="agOverlay" role="dialog" aria-label="Upcoming events">
+<div class="overlay view" id="agOverlay" role="dialog" aria-label="Upcoming events">
   <div class="ov-head"><h2>Next 3 weeks</h2><button class="btn" id="agClose">Close</button></div>
   <div class="set-body" id="agBody"></div>
 </div>
@@ -405,7 +516,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
 </div>
 
 <!-- Bus panel details -->
-<div class="overlay" id="busOverlay" role="dialog" aria-label="Bus details">
+<div class="overlay view" id="busOverlay" role="dialog" aria-label="Bus details">
   <div class="ov-head">
     <h2 id="busTitle">Buses</h2>
     <button class="btn" id="busEdit">Edit panel</button>
@@ -453,7 +564,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
 </div>
 
 <!-- Public holidays -->
-<div class="overlay" id="holOverlay" role="dialog" aria-label="Public holidays">
+<div class="overlay view" id="holOverlay" role="dialog" aria-label="Public holidays">
   <div class="ov-head">
     <h2>Public holidays</h2>
     <button class="btn" id="holClose">Close</button>
@@ -462,7 +573,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
 </div>
 
 <!-- Warning details -->
-<div class="overlay" id="warnOverlay" role="dialog" aria-label="Weather warnings">
+<div class="overlay view" id="warnOverlay" role="dialog" aria-label="Weather warnings">
   <div class="ov-head">
     <h2>Weather warnings</h2>
     <button class="btn" id="warnClose">Close</button>
@@ -471,7 +582,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
 </div>
 
 <!-- One forecast day -->
-<div class="overlay" id="dayOverlay" role="dialog" aria-label="Forecast for one day">
+<div class="overlay view" id="dayOverlay" role="dialog" aria-label="Forecast for one day">
   <div class="ov-head">
     <h2 id="ddTitle">Forecast</h2>
     <button class="btn" id="ddClose">Close</button>
@@ -480,7 +591,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
 </div>
 
 <!-- Weather details -->
-<div class="overlay" id="wxOverlay" role="dialog" aria-label="Weather details">
+<div class="overlay view" id="wxOverlay" role="dialog" aria-label="Weather details">
   <div class="ov-head">
     <h2>Weather</h2>
     <button class="btn" id="wxClose">Close</button>
@@ -503,6 +614,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
   <div class="sv-inner" id="svInner">
     <div class="sv-time" id="svTime"></div>
     <div class="sv-date" id="svDate"></div>
+    <div class="sv-tz" id="svTz"></div>
     <div class="sv-wx" id="svWx"></div>
   </div>
 </div>
@@ -522,8 +634,8 @@ body.night #dim{opacity:.65;pointer-events:auto}
 <div id="dim"></div>
 
 <script>
-const APP_VERSION = "1.1";
-const VERSIONS = [{"v": "1.1","d": "27 Sept","t": "Your own calendar panel: today's events in the dashboard's style, read through your relay, with countdowns, tap-in details, a three-week list behind Expand, and options by tapping and holding the panel."},{"v": "1.0","d": "27 Sept","t": "Bus, MTR and aircon updates pause while the clock screen shows, and refresh as soon as you walk past or tap. Settings backup and restore, a quiet refresh every night at 4am, and this About section with a status check and version history."},{"v": "0.20","d": "27 Sept","t": "Stale-data and connection warnings, timetable estimates shown lighter, tap for bus details and tap and hold to edit, the More menu, clearer Settings, bigger text, and a fix for Settings wiping your MTR stations."},{"v": "0.19","d": "27 Sept","t": "Automatic switch to overnight N routes after the last bus."},{"v": "0.18","d": "27 Sept","t": "Night light fixes: only when idle, a pause after taps, its own hours, and one tap to wake."},{"v": "0.17","d": "27 Sept","t": "Today and Tomorrow in matching detail, tap-in days, and sunrise and sunset for each day."},{"v": "0.16","d": "26 Sept","t": "One-tap aircon buttons through Tuya, with an All off button."},{"v": "0.15","d": "26 Sept","t": "Tap a warning for the Observatory's full statement."},{"v": "0.14","d": "26 Sept","t": "Searchable lists for routes, stops and stations."},{"v": "0.13","d": "26 Sept","t": "Black clock screensaver after 10 minutes, and a motion-triggered night light."},{"v": "0.12","d": "26 Sept","t": "Edit a bus panel by tapping it, and edit MTR stations on any line."},{"v": "0.11","d": "26 Sept","t": "Moved to GitHub Pages for the new tablet, with your email removed from the public page, and more reliable Aircon and Doorbell buttons."},{"v": "0.10","d": "24 Sept","t": "Next public holiday on the dashboard, and a tap-in list of holidays with long-weekend tags."},{"v": "0.9","d": "24 Sept","t": "Weather detail page, redesigned with big icons for reading across the room. Live tram times were tried and removed, since Hong Kong Tramways doesn't make them available."},{"v": "0.8","d": "24 Sept","t": "Auto theme by default, calendar opens in List view, clock-tap fix, and a sunrise timing fix."},{"v": "0.7","d": "24 Sept","t": "KMB routes added, with both companies' buses shown on jointly run routes."},{"v": "0.6","d": "24 Sept","t": "Sunrise and sunset theme with tap-the-clock override, and route, direction and stop dropdowns using Citybus data."},{"v": "0.5","d": "24 Sept","t": "Settings page for bus routes, themes and weather location, plus a full-screen calendar."},{"v": "0.4","d": "24 Sept","t": "MTR times for Wan Chai and Exhibition Centre, the UV index, and heat and cold warnings."},{"v": "0.3","d": "24 Sept","t": "To Kwun Tong panel (601, 619), then a 2x2 bus grid with a new Airport and West panel (A11, 111, 101)."},{"v": "0.2","d": "24 Sept","t": "Refresh button, weather labelled as Wan Chai with local rainfall, and layout fixes so the panels fill the screen."},{"v": "0.1","d": "24 Sept","t": "First dashboard: clock, Observatory weather and warnings, live Citybus times from Hennessy Road Govt Primary School and Burrows Street, Google Calendar, Aircon and Doorbell app buttons, and night dimming."}];
+const APP_VERSION = "1.3";
+const VERSIONS = [{"v": "1.3","d": "27 Sept","t": "A quick tour of the dashboard, a How to use guide with a colour key, and a Large text option."},{"v": "1.2","d": "27 Sept","t": "A second clock for Melbourne, with daylight saving handled automatically. Views close when you tap outside them or after two minutes idle, buses under two minutes away and events starting within 15 minutes turn amber, icons and tap feedback on the footer buttons, and warmer colours after midnight."},{"v": "1.1","d": "27 Sept","t": "Your own calendar panel: today's events in the dashboard's style, read through your relay, with countdowns, tap-in details, a three-week list behind Expand, and options by tapping and holding the panel."},{"v": "1.0","d": "27 Sept","t": "Bus, MTR and aircon updates pause while the clock screen shows, and refresh as soon as you walk past or tap. Settings backup and restore, a quiet refresh every night at 4am, and this About section with a status check and version history."},{"v": "0.20","d": "27 Sept","t": "Stale-data and connection warnings, timetable estimates shown lighter, tap for bus details and tap and hold to edit, the More menu, clearer Settings, bigger text, and a fix for Settings wiping your MTR stations."},{"v": "0.19","d": "27 Sept","t": "Automatic switch to overnight N routes after the last bus."},{"v": "0.18","d": "27 Sept","t": "Night light fixes: only when idle, a pause after taps, its own hours, and one tap to wake."},{"v": "0.17","d": "27 Sept","t": "Today and Tomorrow in matching detail, tap-in days, and sunrise and sunset for each day."},{"v": "0.16","d": "26 Sept","t": "One-tap aircon buttons through Tuya, with an All off button."},{"v": "0.15","d": "26 Sept","t": "Tap a warning for the Observatory's full statement."},{"v": "0.14","d": "26 Sept","t": "Searchable lists for routes, stops and stations."},{"v": "0.13","d": "26 Sept","t": "Black clock screensaver after 10 minutes, and a motion-triggered night light."},{"v": "0.12","d": "26 Sept","t": "Edit a bus panel by tapping it, and edit MTR stations on any line."},{"v": "0.11","d": "26 Sept","t": "Moved to GitHub Pages for the new tablet, with your email removed from the public page, and more reliable Aircon and Doorbell buttons."},{"v": "0.10","d": "24 Sept","t": "Next public holiday on the dashboard, and a tap-in list of holidays with long-weekend tags."},{"v": "0.9","d": "24 Sept","t": "Weather detail page, redesigned with big icons for reading across the room. Live tram times were tried and removed, since Hong Kong Tramways doesn't make them available."},{"v": "0.8","d": "24 Sept","t": "Auto theme by default, calendar opens in List view, clock-tap fix, and a sunrise timing fix."},{"v": "0.7","d": "24 Sept","t": "KMB routes added, with both companies' buses shown on jointly run routes."},{"v": "0.6","d": "24 Sept","t": "Sunrise and sunset theme with tap-the-clock override, and route, direction and stop dropdowns using Citybus data."},{"v": "0.5","d": "24 Sept","t": "Settings page for bus routes, themes and weather location, plus a full-screen calendar."},{"v": "0.4","d": "24 Sept","t": "MTR times for Wan Chai and Exhibition Centre, the UV index, and heat and cold warnings."},{"v": "0.3","d": "24 Sept","t": "To Kwun Tong panel (601, 619), then a 2x2 bus grid with a new Airport and West panel (A11, 111, 101)."},{"v": "0.2","d": "24 Sept","t": "Refresh button, weather labelled as Wan Chai with local rainfall, and layout fixes so the panels fill the screen."},{"v": "0.1","d": "24 Sept","t": "First dashboard: clock, Observatory weather and warnings, live Citybus times from Hennessy Road Govt Primary School and Burrows Street, Google Calendar, Aircon and Doorbell app buttons, and night dimming."}];
 /* ======== DEFAULTS (Settings on screen override these) ======== */
 const DEFAULTS = {
   calendarId: "",
@@ -532,6 +644,9 @@ const DEFAULTS = {
   themeCustom: { light: "07:00", dark: "19:00" },
   nightDim: { on: true, from: "23:30", to: "06:30" },
   saver: { on: true, minutes: 10 },
+  tz2: { on: true, label: "Melbourne", zone: "Australia/Melbourne" },
+  warmNight: true,
+  textSize: "normal",
   cal: { tomorrow: true, tomorrowCount: 2, countdown: true, location: true, showPast: false, allDay: true, hideWords: "", cals: {} },
   nightlight: { on: true, minutes: 2, from: "01:00", to: "06:00" },   // warm glow when Fully PLUS detects motion
   aircon: { relay: "", key: "", units: [] },            // units: [{ name, id }] — filled in on the tablet               // warm glow when Fully PLUS detects motion at night       // clock screensaver after this many idle minutes
@@ -647,6 +762,10 @@ function applyTheme(){
   if (themeOverride && Date.now() < themeOverride.until) t = themeOverride.theme;
   else if (themeOverride){ themeOverride = null; store.del("themeOverride"); }
   if (document.documentElement.dataset.theme !== t) document.documentElement.dataset.theme = t;
+  const hk = new Date(Date.now() + 8*3600000), mins = hk.getUTCHours()*60 + hk.getUTCMinutes();
+  const rise = sunTimes(new Date()).rise, riseHk = new Date(rise.getTime() + 8*3600000), riseMin = riseHk.getUTCHours()*60 + riseHk.getUTCMinutes();
+  const warm = S.warmNight !== false && t === "dark" && mins < riseMin;          // midnight until sunrise
+  document.documentElement.toggleAttribute("data-warm", warm);
 }
 // Tap the clock to flip light/dark until the next sunrise, sunset or custom switch
 let lastFlip = 0;
@@ -841,6 +960,77 @@ function dailyReload(){
 }
 setInterval(dailyReload, 60000);
 
+/* ---- second clock (e.g. Melbourne), daylight saving included ---- */
+const tzFmt = {};
+function zoneOffsetMin(zone, ms = Date.now()){
+  try {
+    const f = tzFmt[zone] ||= new Intl.DateTimeFormat("en-US", { timeZone: zone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+    const p = Object.fromEntries(f.formatToParts(new Date(ms)).map(x => [x.type, x.value]));
+    return Math.round((Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute) - Math.floor(ms / 60000) * 60000) / 60000);
+  } catch { return null; }
+}
+const T2 = () => ({ ...DEFAULTS.tz2, ...(S.tz2 || {}) });
+function tzTime(zone, ms = Date.now(), withDay){
+  try { return new Date(ms).toLocaleString(S.clock24h ? "en-GB" : "en-US", { timeZone: zone, hour: S.clock24h ? "2-digit" : "numeric", minute: "2-digit", ...(withDay ? { weekday: "short" } : {}) }).replace(/ (AM|PM)/, (m, x) => " " + x.toLowerCase()); }
+  catch { return "--:--"; }
+}
+function diffText(min){
+  if (min == null) return "";
+  const d = (min - 480) / 60;
+  if (d === 0) return "same time";
+  const v = Math.abs(d), n = Number.isInteger(v) ? v : v.toFixed(1);
+  return `${d > 0 ? "+" : "−"}${n} hr${v === 1 ? "" : "s"}`;
+}
+function nextOffsetChange(zone){                       // when the time difference next changes (daylight saving)
+  const now = Date.now(), cur = zoneOffsetMin(zone, now);
+  if (cur == null) return null;
+  let lo = null;
+  for (let d = 1; d <= 400; d++){ if (zoneOffsetMin(zone, now + d * 86400000) !== cur){ lo = now + (d - 1) * 86400000; break; } }
+  if (lo == null) return null;
+  let hi = lo + 86400000;
+  while (hi - lo > 60000){ const mid = Math.floor((lo + hi) / 2); if (zoneOffsetMin(zone, mid) === cur) lo = mid; else hi = mid; }
+  return { at: hi, from: cur, to: zoneOffsetMin(zone, hi + 60000) };
+}
+function renderTz2(){
+  const t = T2(), el = $("tz2"), sv = $("svTz");
+  if (!t.on || !t.zone || zoneOffsetMin(t.zone) == null){ el.hidden = true; sv.textContent = ""; return; }
+  const off = zoneOffsetMin(t.zone), hkDay = new Date(Date.now() + 8*3600000).getUTCDay(), zDay = new Date(Date.now() + off*60000).getUTCDay();
+  const txt = `${t.label || t.zone.split("/").pop().replace(/_/g, " ")} ${tzTime(t.zone, Date.now(), zDay !== hkDay)}, ${diffText(off)}`;
+  el.hidden = false; el.textContent = txt; sv.textContent = txt;
+  el.setAttribute("aria-label", `${txt}. Tap for details, tap and hold to change.`);
+}
+function openTz2(){
+  const t = T2(), z = t.zone, name = t.label || z.split("/").pop().replace(/_/g, " ");
+  const off = zoneOffsetMin(z), ch = nextOffsetChange(z);
+  const full = new Date().toLocaleDateString("en-GB", { timeZone: z, weekday: "long", day: "numeric", month: "long" });
+  const at = (hr, fromZone) => {                       // what hr:00 in one place is in the other
+    const base = new Date(); const ymd = new Date(Date.now() + (fromZone === "HK" ? 480 : off) * 60000).toISOString().slice(0,10);
+    const local = Date.parse(ymd + "T" + String(hr).padStart(2,"0") + ":00:00Z");
+    const utc = local - (fromZone === "HK" ? 480 : zoneOffsetMin(z, local - off*60000)) * 60000;
+    return fromZone === "HK" ? tzTime(z, utc) : tzTime("Asia/Hong_Kong", utc);
+  };
+  const hrs = [9, 12, 18], lab = h => S.clock24h ? String(h).padStart(2,"0") + ":00" : (h % 12 || 12) + (h < 12 ? " am" : " pm");
+  $("tzTitle").textContent = name;
+  $("tzBody").innerHTML = `<section>
+      <div class="tz-big">${esc(tzTime(z))}</div>
+      <div class="tz-sub">${esc(full)}, ${esc(diffText(off))} from Hong Kong</div>
+      ${ch ? `<p class="tz-note">On ${new Date(ch.at).toLocaleDateString("en-GB", { timeZone: z, weekday: "long", day: "numeric", month: "long" })}, ${esc(name)}'s clocks go ${ch.to > ch.from ? "forward" : "back"}, and it will be ${esc(diffText(ch.to))} from Hong Kong.</p>` : ""}
+    </section>
+    <section><h3>Handy times</h3>
+      <div class="tz-grid">
+        <b>In ${esc(name)}</b><b>In Hong Kong</b>
+        ${hrs.map(h => `<span>${lab(h)}</span><span>${esc(at(h, "Z"))}</span>`).join("")}
+      </div>
+      <div class="tz-grid" style="margin-top:14px">
+        <b>In Hong Kong</b><b>In ${esc(name)}</b>
+        ${hrs.map(h => `<span>${lab(h)}</span><span>${esc(at(h, "HK"))}</span>`).join("")}
+      </div>
+    </section>`;
+  $("tzOverlay").classList.add("open");
+}
+$("tzClose").onclick = () => $("tzOverlay").classList.remove("open");
+$("tzEdit").onclick = () => { $("tzOverlay").classList.remove("open"); openSettings(); setTimeout(() => $("sec-tz2")?.scrollIntoView({ block: "start" }), 50); };
+
 /* ---- clock + night dim ---- */
 let undimUntil = 0;
 function tick(){
@@ -849,6 +1039,7 @@ function tick(){
   if (S.clock24h) $("clock").textContent = `${String(h).padStart(2,"0")}:${m}`;
   else { const ap = h < 12 ? "am" : "pm"; h = h % 12 || 12; $("clock").innerHTML = `${h}:${m}<small>${ap}</small>`; }
   $("date").textContent = d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  renderTz2();
   applyTheme();
   const mins = d.getHours()*60 + d.getMinutes();
   const toM = s => { const [a,b] = String(s).split(":").map(Number); return a*60+b; };
@@ -1158,7 +1349,7 @@ async function loadBuses(){
         rows.push(`<div class="row"><div class="plate ${night ? "night" : ""}">${esc((night ? night.route : r.route).toUpperCase())}</div><div>` +
           (!found ? `<div class="msg">Stop not found. Tap and hold to pick it again.</div>` :
            !list.length ? `<div class="msg">${esc(note || "No buses scheduled right now")}</div>` :
-           `<div class="etas">${list.map((e,k) => `<span class="n ${k ? "" : "next"} ${e.sched ? "sched" : ""}" ${e.sched ? 'title="Timetable estimate"' : ""}>${e.m === 0 ? "Now" : e.m + '<span class="u">min</span>'}</span>`).join("")}</div>
+           `<div class="etas">${list.map((e,k) => `<span class="n ${k ? "" : "next"} ${e.sched ? "sched" : ""} ${!k && e.m <= 2 ? "soon" : ""}" ${e.sched ? 'title="Timetable estimate"' : ""}>${e.m === 0 ? "Now" : e.m + '<span class="u">min</span>'}</span>`).join("")}</div>
             <div class="dest">${from}${esc(list[0].dest || "")}</div>`) +
           `</div></div>`);
       }
@@ -1207,7 +1398,7 @@ function renderBusDetail(){
         <div class="bd-stop">${r.night ? "Overnight route. " : ""}From ${esc(r.stop)}${r.all[0]?.dest ? ` to ${esc(r.all[0].dest)}` : ""}</div>
         ${!r.found ? `<div class="msg">Stop not found. Tap Edit panel to pick it again.</div>` :
           !r.all.length ? `<div class="msg">${esc(r.note || "No buses scheduled right now")}</div>` :
-          `<div class="bd-times">${r.all.map(e => `<div class="bd-t ${e.sched ? "sched" : ""}"><b>${e.m === 0 ? "Now" : e.m}</b>${e.m === 0 ? "" : "<span>min</span>"}${e.sched ? "<small>timetable</small>" : "<small>live</small>"}</div>`).join("")}</div>`}
+          `<div class="bd-times">${r.all.map((e, k) => `<div class="bd-t ${e.sched ? "sched" : ""} ${!k && e.m <= 2 ? "soon" : ""}"><b>${e.m === 0 ? "Now" : e.m}</b>${e.m === 0 ? "" : "<span>min</span>"}${e.sched ? "<small>timetable</small>" : "<small>live</small>"}</div>`).join("")}</div>`}
       </div>
     </article>`).join("") +
     `<p class="hint bd-foot">Updated ${ago < 60 ? ago + " seconds" : Math.round(ago/60) + " min"} ago. "Live" times come from the bus's GPS; "timetable" times are the operator's estimate.</p>`;
@@ -1583,7 +1774,8 @@ function renderCalendar(){
     const when = isNow ? `Now<small>${fmtTime(new Date(e.start))}</small>`
       : `${fmtTime(new Date(Math.max(e.start, t0)))}${o.countdown && !past && e.start > now ? `<small>in ${durText(e.start - now)}</small>` : ""}`;
     const sub = isNow && o.countdown ? `Ends in ${durText(e.end - now)}${o.location && e.location ? ", " + esc(e.location) : ""}` : (o.location && e.location ? esc(e.location) : "");
-    html += `<div class="cev ${isNow ? "now" : ""} ${past ? "past" : ""}" data-ev="${idx(e)}"><div class="when">${when}</div><span class="cbar" style="background:${c.color}"></span>
+    const soon = !isNow && e.start > now && e.start - now <= 15*60000;
+    html += `<div class="cev ${isNow ? "now" : ""} ${past ? "past" : ""} ${soon ? "soon" : ""}" data-ev="${idx(e)}"><div class="when">${when}</div><span class="cbar" style="background:${c.color}"></span>
       <div><div class="ttl">${esc(e.title)}</div>${sub ? `<div class="sub">${sub}</div>` : ""}</div></div>`;
   }
   if (!timed.length) html += `<div class="cal-empty">${html ? "No other events today." : "Nothing on today."}</div>`;
@@ -1602,7 +1794,7 @@ function renderCalendar(){
     rows.pop().remove(); hidden++;
     let more = list.querySelector(".cal-more");
     if (!more){ more = document.createElement("div"); more.className = "cal-more"; list.querySelector(".cal-tmr") ? list.insertBefore(more, list.querySelector(".cal-tmr")) : list.appendChild(more); }
-    more.textContent = `and ${hidden} more today. Tap Expand to see them.`;
+    more.textContent = `and ${hidden} more today`;
   }
   if (list.scrollHeight > list.clientHeight + 1) list.querySelectorAll(".cal-tmr div").forEach((d, i, all) => { if (i >= 1 && list.scrollHeight > list.clientHeight + 1) d.remove(); });
   if (list.scrollHeight > list.clientHeight + 1) list.querySelector(".cal-tmr")?.remove();   // very short panel: today comes first
@@ -1632,7 +1824,7 @@ function openEvent(i){
       ${e.notes ? `<span>Notes</span><p>${esc(e.notes)}</p>` : ""}
       ${e.repeat ? `<span>Repeats</span><p>${esc(e.repeat.replace(/^Repeats /, "").replace(/^./, m => m.toUpperCase()))}</p>` : ""}
     </div></section>`;
-  $("evOverlay").classList.add("open");
+  $("evOverlay").classList.add("open"); evOpenedAt = Date.now();
 }
 function openAgenda(){
   if (calMode !== "custom"){ $("calOverlay").classList.add("open"); setCalMode("AGENDA"); return; }
@@ -1693,12 +1885,13 @@ $("ceSave").onclick = () => {
   $("ceOverlay").classList.remove("open"); renderCalendar();
 };
 $("evClose").onclick = () => $("evOverlay").classList.remove("open");
+let evOpenedAt = 0;
 $("agClose").onclick = () => $("agOverlay").classList.remove("open");
 $("agBody").addEventListener("click", e => { const r = e.target.closest("[data-ev]"); if (r) openEvent(r.dataset.ev); });
 pressable($("calbox"), t => {
   if (t?.closest?.("#btn-cal")) return openAgenda();
   const r = t?.closest?.("[data-ev]"); if (r) return openEvent(r.dataset.ev);
-  if (calMode === "custom") toast("Tap an event for details, or tap and hold to customise");
+  openAgenda();                                        // empty space opens the list of upcoming events
 }, openCalEditor);
 function setCalMode(mode){
   $("calModes").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
@@ -1722,10 +1915,19 @@ function renderSettings(src){
   const panels = Array.from({length: MAX_PANELS}, (_, i) => src.panels[i] || { title: "", routes: [] });
   $("setBody").innerHTML = `
   <nav class="set-nav" aria-label="Settings sections">
-    <button data-to="sec-display">Display</button><button data-to="sec-night">Screensaver and night</button>
-    <button data-to="sec-aircon">Aircon</button><button data-to="sec-weather">Weather</button><button data-to="sec-calendar">Calendar</button><button data-to="sec-backup">Backup</button><button data-to="sec-about">About</button>
+    <button data-to="sec-display">Display</button><button data-to="sec-tz2">Second clock</button><button data-to="sec-night">Screensaver and night</button>
+    <button data-to="sec-aircon">Aircon</button><button data-to="sec-weather">Weather</button><button data-to="sec-calendar">Calendar</button><button data-to="sec-backup">Backup</button><button data-to="sec-help">How to use</button><button data-to="sec-about">About</button>
   </nav>
   <p class="hint">Bus panels and MTR stations are set by tapping and holding them on the dashboard.</p>
+  <section id="sec-tz2">
+    <h3>Second clock</h3>
+    <p class="hint">Shows another city's time under the date, with daylight saving handled automatically. Tap it on the dashboard for details.</p>
+    <div class="fields">
+      <label class="field check"><input type="checkbox" id="s-tz2on" ${src.tz2?.on !== false ? "checked" : ""}> Show a second clock</label>
+      <label class="field">Name shown<input id="s-tz2label" value="${esc(src.tz2?.label ?? "Melbourne")}" placeholder="Melbourne"></label>
+      <label class="field">Time zone<select id="s-tz2zone" class="searchable" aria-label="Time zone">${zoneOptions(src.tz2?.zone || "Australia/Melbourne")}</select></label>
+    </div>
+  </section>
   <section id="sec-display">
     <h3>Display</h3>
     <p class="hint">Sunrise and sunset in Hong Kong today: ${fmtTime(sunTimes(new Date()).rise)} and ${fmtTime(sunTimes(new Date()).set)}. Tap the clock on the dashboard to switch light or dark until the next change.</p>
@@ -1739,6 +1941,9 @@ function renderSettings(src){
         </select></label>
       <label class="field">Light from (custom)<input type="time" id="s-light" value="${esc(src.themeCustom.light)}"></label>
       <label class="field">Dark from (custom)<input type="time" id="s-dark" value="${esc(src.themeCustom.dark)}"></label>
+      <label class="field check"><input type="checkbox" id="s-warm" ${src.warmNight !== false ? "checked" : ""}> Warmer colours from midnight to sunrise</label>
+      <label class="field">Text size
+        <select id="s-text"><option value="normal" ${src.textSize !== "large" ? "selected" : ""}>Normal</option><option value="large" ${src.textSize === "large" ? "selected" : ""}>Large</option></select></label>
       <label class="field">Clock
         <select id="s-clock"><option value="12" ${!src.clock24h?"selected":""}>12-hour</option><option value="24" ${src.clock24h?"selected":""}>24-hour</option></select></label>
       <label class="field check"><input type="checkbox" id="s-dim" ${src.nightDim.on?"checked":""}> Dim the screen at night</label>
@@ -1805,6 +2010,11 @@ function renderSettings(src){
     <label class="field" style="margin-top:10px">Backup code<textarea id="bk-code" rows="3" spellcheck="false" autocapitalize="off" placeholder="Your backup code appears here. To restore, paste a code here and tap Restore."></textarea></label>
     <div class="pe-actions"><button class="btn" id="bk-restore" type="button">Restore from this code</button></div>
   </section>
+  <section id="sec-help">
+    <h3>How to use</h3>
+    <p class="hint">A guide to what everything does and what the colours mean, and a quick tour that points each part out on the dashboard.</p>
+    <div class="pe-actions"><button class="btn" type="button" id="s-help">Open the guide</button><button class="btn" type="button" id="s-tour">Take the tour</button></div>
+  </section>
   <section id="sec-about">
     <h3>About</h3>
     <p class="about-v">Version ${APP_VERSION}</p>
@@ -1817,6 +2027,8 @@ function renderSettings(src){
 `;
   enhanceSelects($("setBody"));
   renderStatus();
+  $("s-help").onclick = () => { $("setOverlay").classList.remove("open"); openHelp(); };
+  $("s-tour").onclick = () => { $("setOverlay").classList.remove("open"); startTour(); };
   $("bk-make").onclick = () => {
     const data = { v: APP_VERSION, made: new Date().toISOString(), settings: store.get("dashSettings") || {} };
     $("bk-code").value = "DASHBOARD1:" + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
@@ -1863,6 +2075,9 @@ function readSettings(){
   return {
     calendarId: v("s-cal"),
     clock24h: v("s-clock") === "24",
+    tz2: { on: $("s-tz2on").checked, label: v("s-tz2label"), zone: v("s-tz2zone") || "Australia/Melbourne" },
+    warmNight: $("s-warm").checked,
+    textSize: v("s-text"),
     theme: v("s-theme"),
     themeCustom: { light: v("s-light") || "07:00", dark: v("s-dark") || "19:00" },
     nightDim: { on: $("s-dim").checked, from: v("s-dimfrom") || "23:30", to: v("s-dimto") || "06:30" },
@@ -1875,6 +2090,14 @@ function readSettings(){
     panels: S.panels
   };
 }
+function zoneOptions(cur){
+  let zones = [];
+  try { zones = Intl.supportedValuesOf("timeZone"); } catch {}
+  if (!zones.length) zones = ["Australia/Melbourne","Australia/Sydney","Australia/Brisbane","Australia/Perth","Asia/Singapore","Asia/Tokyo","Asia/Seoul","Asia/Shanghai","Asia/Taipei","Asia/Bangkok","Europe/London","Europe/Paris","America/New_York","America/Los_Angeles","America/Vancouver","America/Toronto","Pacific/Auckland","UTC"];
+  if (cur && !zones.includes(cur)) zones.unshift(cur);
+  return zones.map(z => `<option value="${esc(z)}" ${z === cur ? "selected" : ""}>${esc(z.replace(/_/g, " ").replace("/", ": "))}</option>`).join("");
+}
+
 /* ---- About: version history and status ---- */
 function vEntry(x){ return `<div class="vrow"><b>Version ${esc(x.v)}</b><span>${esc(x.d)}</span><p>${esc(x.t)}</p></div>`; }
 function agoText(t){
@@ -2058,10 +2281,10 @@ async function acFetch(path, opts = {}){
 }
 function buildAcButtons(){
   const g = $("acGroup");
-  if (!acReady()){ g.innerHTML = `<button class="btn" id="btn-ac">Aircon</button>`; $("btn-ac").onclick = () => openApp(APPS.aircon, "Smart Life"); return; }
+  if (!acReady()){ g.innerHTML = `<button class="btn ic-btn" id="btn-ac"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5 12 6l3-2.5M9 20.5l3-2.5 3 2.5M3.3 10.1l3.9 1-1 3.8M20.7 13.9l-3.9-1 1-3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Aircon</button>`; $("btn-ac").onclick = () => openApp(APPS.aircon, "Smart Life"); return; }
   const units = AC().units.filter(u => u.id);
-  g.innerHTML = units.map((u, i) => `<button class="btn ac unknown" data-i="${i}" aria-pressed="false"><span class="dot"></span><span class="nm">${esc(u.name || "Aircon " + (i+1))}</span></button>`).join("") +
-    (units.length > 1 ? `<button class="btn" id="btn-acoff">All off</button>` : "");
+  g.innerHTML = units.map((u, i) => `<button class="btn ac unknown" data-i="${i}" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5 12 6l3-2.5M9 20.5l3-2.5 3 2.5M3.3 10.1l3.9 1-1 3.8M20.7 13.9l-3.9-1 1-3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nm">${esc(u.name || "Aircon " + (i+1))}</span></button>`).join("") +
+    (units.length > 1 ? `<button class="btn ic-btn" id="btn-acoff"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8M7 6.3a8 8 0 1 0 10 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>All off</button>` : "");
   g.querySelectorAll(".btn.ac").forEach(b => b.onclick = () => acToggle(units[+b.dataset.i]));
   const off = $("btn-acoff"); if (off) off.onclick = acAllOff;
   paintAc();
@@ -2093,11 +2316,14 @@ async function acSet(u, on){
   catch (e) { acState[u.id] = before; paintAc(); toast(`${u.name || "Aircon"}: ${e.message}`); return false; }
   finally { b?.classList.remove("busy"); }
 }
+function pulse(el){ if (!el) return; el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); try { navigator.vibrate?.(15); } catch {} }
 async function acToggle(u){
+  pulse($("acGroup").querySelector(`.btn.ac[data-i="${AC().units.filter(x => x.id).indexOf(u)}"]`));
   const ok = await acSet(u, acState[u.id] !== true);
   if (ok){ toast(`${u.name || "Aircon"} turned ${acState[u.id] ? "on" : "off"}`); setTimeout(acRefresh, 5000); }
 }
 async function acAllOff(){
+  pulse($("btn-acoff"));
   const units = AC().units.filter(u => u.id);
   const b = $("btn-acoff"); b.disabled = true; b.textContent = "Turning off…";
   const results = [];
@@ -2148,6 +2374,130 @@ if (store.get("seenVersion") !== APP_VERSION){
   b.onclick = () => { done(); openSettings(); setTimeout(() => $("sec-about")?.scrollIntoView({ block: "start" }), 50); };
   setTimeout(done, 15000);
 }
+
+pressable($("tz2"), () => openTz2(), () => { openSettings(); setTimeout(() => $("sec-tz2")?.scrollIntoView({ block: "start" }), 50); });
+
+/* ---- views: tap outside to close, and close by themselves after 2 minutes idle ---- */
+const CONTAINERS = ".overlay.view, .overlay.view > .set-body, .wx-body, .wx-top, .days8, .dd, .hol-body, #busBody, #agBody, #tzBody, #warnBody, #evBody";
+document.querySelectorAll(".overlay.view").forEach(ov => {
+  new MutationObserver(() => { if (ov.classList.contains("open")) ov.dataset.openedAt = Date.now(); }).observe(ov, { attributes: true, attributeFilter: ["class"] });
+  ov.addEventListener("click", e => {
+    if (Date.now() - Number(ov.dataset.openedAt || 0) < 500) return;       // ignore the tap that opened it
+    if (e.target.matches(CONTAINERS)) { ov.classList.remove("open"); if (ov.id === "calOverlay") $("calFull").src = "about:blank"; }
+  });
+});
+setInterval(() => {
+  if (Date.now() - lastTouch < 2*60000) return;
+  document.querySelectorAll(".overlay.view.open").forEach(ov => { ov.classList.remove("open"); if (ov.id === "calOverlay") $("calFull").src = "about:blank"; });
+  closeMenu();
+}, 15000);
+
+/* ---- text size ---- */
+const applyTextSize = () => { document.documentElement.dataset.text = S.textSize === "large" ? "large" : "normal"; };
+applyTextSize();
+
+/* ---- colour key samples, shared by the guide and the tour ---- */
+const KEY = {
+  next: `<span class="key-s etas"><span class="n next">6<span class="u">min</span></span></span>`,
+  soon: `<span class="key-s etas"><span class="n next soon">2<span class="u">min</span></span></span>`,
+  sched: `<span class="key-s etas"><span class="n next sched">9<span class="u">min</span></span></span>`,
+  stale: `<span class="key-s etas key-stale"><span class="n next">6<span class="u">min</span></span></span>`,
+  night: `<span class="plate night key-plate">N90</span>`,
+  day: `<span class="plate key-plate">90</span>`,
+  calNow: `<span class="key-chip key-now">Now</span>`,
+  calSoon: `<span class="key-chip key-soon">Starting soon</span>`,
+  acOn: `<span class="key-ac on"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5 12 6l3-2.5M9 20.5l3-2.5 3 2.5M3.3 10.1l3.9 1-1 3.8M20.7 13.9l-3.9-1 1-3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`,
+  acOff: `<span class="key-ac"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5 12 6l3-2.5M9 20.5l3-2.5 3 2.5M3.3 10.1l3.9 1-1 3.8M20.7 13.9l-3.9-1 1-3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`
+};
+const keyRow = (sample, text) => `<div class="key-row"><span class="key-sample">${sample}</span><span>${text}</span></div>`;
+
+/* ---- How to use guide ---- */
+function openHelp(){
+  closeMenu();
+  $("helpBody").innerHTML = `
+  <section><h3>Tapping</h3>
+    <div class="help-list">
+      <div><b>Tap</b><span>Opens more detail: buses, weather, warnings, holidays, events and the second clock.</span></div>
+      <div><b>Tap and hold</b><span>Edits that part: bus panels, MTR stations, the calendar and the second clock.</span></div>
+      <div><b>Tap outside</b><span>Closes a detail view. They also close by themselves after 2 minutes.</span></div>
+      <div><b>Tap the time</b><span>Switches between light and dark until the next sunrise or sunset.</span></div>
+      <div><b>More</b><span>Refresh, this guide, the tour and Settings.</span></div>
+    </div>
+  </section>
+  <section><h3>Bus times</h3>
+    ${keyRow(KEY.next, "The next bus, tracked live by GPS.")}
+    ${keyRow(KEY.soon, "Two minutes or less away. Time to go.")}
+    ${keyRow(KEY.sched, "Lighter: the operator's timetable estimate, not live tracking.")}
+    ${keyRow(KEY.stale, "Greyed out: these times are over two minutes old, usually because the connection dropped.")}
+    ${keyRow(KEY.night + " " + KEY.day, "A dark plate is an overnight route, shown after the last day bus.")}
+  </section>
+  <section><h3>Calendar</h3>
+    ${keyRow(KEY.calNow, "Happening now, with a countdown to when it ends.")}
+    ${keyRow(KEY.calSoon, "Starting within 15 minutes.")}
+    ${keyRow(`<span class="key-chip key-bar"></span>`, "The coloured bar shows which calendar an event is from.")}
+  </section>
+  <section><h3>Everything else</h3>
+    ${keyRow(KEY.acOn + " " + KEY.acOff, "A green snowflake means that aircon is on. All off switches them all off.")}
+    ${keyRow(`<span class="warn key-warn">Warning</span>`, "Weather warnings. Red is severe. Tap one for the Observatory's full statement.")}
+    ${keyRow(`<span class="key-chip key-conn">No connection</span>`, "The dashboard can't reach the internet. Times may be out of date.")}
+    ${keyRow(`<span class="key-chip key-clock">Clock screen</span>`, "After 10 minutes without a tap, the screen shows a big clock. Tap, or walk past with motion detection on, to come back.")}
+  </section>`;
+  $("helpOverlay").classList.add("open");
+}
+$("helpClose").onclick = () => $("helpOverlay").classList.remove("open");
+$("helpTour").onclick = () => { $("helpOverlay").classList.remove("open"); startTour(); };
+$("btn-help").onclick = () => { closeMenu(); openHelp(); };
+
+/* ---- quick tour ---- */
+const TOUR = [
+  { el: "#clockBox", title: "The time", text: "Tap the time to switch between light and dark until the next sunrise or sunset." },
+  { el: "#tz2", title: "Second clock", text: "Your second city's time, with daylight saving handled for you. Tap for the date and handy times, tap and hold to change the city." },
+  { el: "#holiday", title: "Public holidays", text: "The next public holiday and how far away it is. Tap for the full list, with long weekends marked." },
+  { el: "#wxBox", title: "Weather", text: "Tap for today, tomorrow and the week ahead. When there's a warning, tap its tag for the Observatory's full statement." },
+  { el: ".bus", title: "Bus panels", text: "Tap for the next three buses, tap and hold to change routes and stops.", keys: () => [keyRow(KEY.next, "Next bus, live"), keyRow(KEY.soon, "Two minutes or less"), keyRow(KEY.sched, "Timetable estimate"), keyRow(KEY.stale, "Out of date"), keyRow(KEY.night, "Overnight route")] },
+  { el: "#mtrBox", title: "MTR", text: "Next trains at your stations. Tap and hold to choose stations and directions." },
+  { el: "#calbox", title: "Calendar", text: "Tap an event for details, anywhere else for the next three weeks. Tap and hold to choose what it shows.", keys: () => [keyRow(KEY.calNow, "Happening now"), keyRow(KEY.calSoon, "Starting within 15 minutes")] },
+  { el: ".bottom", title: "Buttons", text: "Switch each aircon on or off, or all of them at once. More has Refresh, How to use, this tour and Settings.", keys: () => [keyRow(KEY.acOn, "That aircon is on")] }
+];
+let tourSteps = [], tourI = 0;
+function startTour(){
+  closeMenu(); hideSaver();
+  document.querySelectorAll(".overlay.open").forEach(o => o.classList.remove("open"));
+  tourSteps = TOUR.filter(t => { const e = document.querySelector(t.el); return e && !e.hidden && e.offsetParent !== null && e.getBoundingClientRect().width > 0 && (t.el !== "#holiday" || e.textContent.trim()); });
+  tourI = 0; $("tour").hidden = false; $("tourOffer").hidden = true; store.set("tourOffered", true);
+  showTourStep();
+}
+function showTourStep(){
+  const t = tourSteps[tourI], el = document.querySelector(t.el), r = el.getBoundingClientRect(), pad = 8;
+  const spot = $("tourSpot"), card = $("tourCard");
+  Object.assign(spot.style, { left: r.left - pad + "px", top: r.top - pad + "px", width: r.width + pad*2 + "px", height: r.height + pad*2 + "px" });
+  $("tourStep").textContent = `${tourI + 1} of ${tourSteps.length}`;
+  $("tourTitle").textContent = t.title; $("tourText").textContent = t.text;
+  $("tourKeys").innerHTML = t.keys ? t.keys().join("") : "";
+  $("tourBack").hidden = tourI === 0;
+  $("tourNext").textContent = tourI === tourSteps.length - 1 ? "Done" : "Next";
+  // place the card beside the highlighted area, keeping it on screen
+  card.style.left = card.style.top = "0px";
+  const W = innerWidth, H = innerHeight, cw = card.offsetWidth, ch = card.offsetHeight, g = 16;
+  let x, y;
+  if (r.right + g + cw < W) { x = r.right + g; y = r.top; }
+  else if (r.left - g - cw > 0) { x = r.left - g - cw; y = r.top; }
+  else if (r.bottom + g + ch < H) { x = r.left; y = r.bottom + g; }
+  else { x = r.left; y = r.top - g - ch; }
+  card.style.left = Math.max(12, Math.min(W - cw - 12, x)) + "px";
+  card.style.top = Math.max(12, Math.min(H - ch - 12, y)) + "px";
+  $("tourNext").focus({ preventScroll: true });
+}
+const endTour = () => { $("tour").hidden = true; };
+$("tourNext").onclick = () => { if (tourI < tourSteps.length - 1){ tourI++; showTourStep(); } else endTour(); };
+$("tourBack").onclick = () => { if (tourI > 0){ tourI--; showTourStep(); } };
+$("tourSkip").onclick = endTour;
+$("tour").addEventListener("keydown", e => { if (e.key === "Escape") endTour(); if (e.key === "ArrowRight") $("tourNext").click(); if (e.key === "ArrowLeft") $("tourBack").click(); });
+addEventListener("resize", () => { if (!$("tour").hidden) showTourStep(); });
+$("btn-tour").onclick = () => { closeMenu(); startTour(); };
+$("offerYes").onclick = startTour;
+$("offerNo").onclick = () => { $("tourOffer").hidden = true; store.set("tourOffered", true); };
+if (!store.get("tourOffered")) setTimeout(() => { if ($("tour").hidden) $("tourOffer").hidden = false; }, 2500);
 
 /* ---- start ---- */
 applyTheme(); buildPanels();

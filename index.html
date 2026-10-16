@@ -667,7 +667,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
    <button class="btn" id="laundryPause">Pause</button><button class="btn" id="laundryCancel">Cancel timer</button>
   </div>
   <div id="laundrySoundControls">
-   <label class="field">Chime<select id="laundryChime"><option value="bell">Gentle bell</option><option value="melody">Three-note melody</option><option value="beep">Beep</option><option value="silent">Silent</option></select></label>
+   <label class="field">Chime<select id="laundryChime"><option value="melody">Bright doorbell melody · 4 sec</option><option value="bell">Bell · 4 sec</option><option value="beep">Beep · 3 sec</option><option value="silent">Silent</option></select></label>
    <label class="field">Chime volume <span id="laundryVolumeLabel"></span><input id="laundryVolume" aria-label="Chime volume" type="range" min="0" max="100" step="5"></label>
    <div class="laundry-actions"><button class="btn" id="laundryPreview">Preview chime</button></div>
    <p class="laundry-note" id="laundryAudioStatus" role="status">The tablet's media volume also affects the chime.</p>
@@ -2547,16 +2547,20 @@ const LAUNDRY_KEY = 'laundryTimerV1';
 const laundrySaved = store.get(LAUNDRY_KEY) || {};
 let laundry = {
   minutes: Number.isInteger(laundrySaved.minutes) && laundrySaved.minutes >= 1 && laundrySaved.minutes <= 1440 ? laundrySaved.minutes : 75,
-  chime: ['bell','melody','beep','silent'].includes(laundrySaved.chime) ? laundrySaved.chime : 'bell',
-  volume: Number.isFinite(laundrySaved.volume) ? Math.max(0, Math.min(100, laundrySaved.volume)) : 60,
+  chime: ['bell','melody','beep','silent'].includes(laundrySaved.chime) ? laundrySaved.chime : 'melody',
+  volume: Number.isFinite(laundrySaved.volume) ? Math.max(0, Math.min(100, laundrySaved.volume)) : 80,
   state: ['running','paused','done'].includes(laundrySaved.state) ? laundrySaved.state : 'idle',
   end: Number.isFinite(laundrySaved.end) ? laundrySaved.end : 0,
   remaining: Number.isFinite(laundrySaved.remaining) ? laundrySaved.remaining : 0,
-  sounded: laundrySaved.sounded === true
+  sounded: laundrySaved.sounded === true,
+  soundVersion: 2
 };
+// Adopt the new recommended melody once, retaining explicit beep/silent choices and volume.
+if (laundrySaved.soundVersion !== 2 && laundry.chime === 'bell') laundry.chime = 'melody';
 if ((laundry.state === 'running' || laundry.state === 'done') && laundry.end <= 0) laundry.state = 'idle';
 if (laundry.state === 'paused' && laundry.remaining <= 0) laundry.state = 'idle';
 const saveLaundry = () => store.set(LAUNDRY_KEY, laundry);
+saveLaundry();
 let laundryAudio = null, laundryPreviousFocus = null, laundryPlaying = [];
 async function unlockLaundryAudio(){
   const Audio = window.AudioContext || window.webkitAudioContext;
@@ -2574,13 +2578,19 @@ async function playLaundryChime(){
   if (laundry.chime === 'silent' || !laundry.volume) return;
   try {
     await unlockLaundryAudio();
-    const tones = laundry.chime === 'melody' ? [[523.25,0,.45],[659.25,.4,.45],[783.99,.8,.8]] : laundry.chime === 'beep' ? [[880,0,.18],[880,.3,.18]] : [[659.25,0,1.6],[987.77,.15,1.3]];
+    // Two clear phrases, with a pause between them; final note fades at 4.2 seconds.
+    const tones = laundry.chime === 'melody'
+      ? [[659.25,0,.7],[830.61,.55,.7],[987.77,1.1,.9],[659.25,2.2,.7],[830.61,2.75,.7],[987.77,3.3,.9]]
+      : laundry.chime === 'beep'
+      ? [[880,0,.3],[880,.5,.3],[880,1,.3],[880,2.1,.3],[880,2.6,.3],[880,3.1,.3]]
+      : [[659.25,0,1.1],[987.77,.7,1.3],[659.25,2.2,1.1],[987.77,2.9,1.3]];
     const now = laundryAudio.currentTime;
     tones.forEach(([freq,delay,length]) => {
       const osc = laundryAudio.createOscillator(), gain = laundryAudio.createGain(), at = now + delay;
-      osc.type = 'sine'; osc.frequency.value = freq;
+      osc.type = laundry.chime === 'melody' ? 'triangle' : 'sine'; osc.frequency.value = freq;
       gain.gain.setValueAtTime(0, at);
-      gain.gain.linearRampToValueAtTime(laundry.volume / 100 * .22, at + .015);
+      gain.gain.linearRampToValueAtTime(laundry.volume / 100 * .65, at + .02);
+      gain.gain.linearRampToValueAtTime(laundry.volume / 100 * .45, at + length * .65);
       gain.gain.exponentialRampToValueAtTime(.0001, at + length);
       osc.connect(gain); gain.connect(laundryAudio.destination);
       osc.start(at); osc.stop(at + length + .02); laundryPlaying.push(osc);

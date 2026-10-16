@@ -404,6 +404,26 @@ body.night #dim{opacity:.65;pointer-events:auto}
 }
 @media (max-width:560px){ .main{grid-template-columns:1fr} .rt{grid-template-columns:64px 1fr} }
 @media (prefers-reduced-motion:reduce){#dim{transition:none}}
+
+/* Laundry timer */
+.bottom{flex-wrap:wrap}
+.laundry-shade{position:fixed;inset:0;z-index:45;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:18px}
+.laundry-shade[hidden]{display:none}
+.laundry-card [hidden]{display:none!important}
+.laundry-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px;width:min(540px,100%);max-height:calc(100dvh - 36px);overflow:auto;box-shadow:0 20px 80px #0006}
+.laundry-card h2{font:600 32px var(--display);padding-right:48px}
+.laundry-close{position:absolute;right:14px;top:14px;font-size:26px;padding:0;min-width:48px}
+.laundry-count{font:600 clamp(48px,10vw,76px) var(--display);color:var(--soon);font-variant-numeric:tabular-nums;margin:18px 0 0}
+.laundry-note{font-size:17px;color:var(--muted);line-height:1.5;margin:8px 0 18px}
+.laundry-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.laundry-card .field{font-size:16px;margin-top:16px}
+.laundry-card input,.laundry-card select{font:500 18px var(--font);color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px;min-height:48px;width:100%}
+.laundry-card input[type=range]{accent-color:var(--plate);padding:0}
+#laundryAudioStatus{font-size:14px;min-height:20px}
+#btn-laundry.running{border-color:var(--soon);color:var(--soon)}
+#btn-laundry.ready{background:var(--plate);color:var(--plate-ink)}
+#svLaundry{font-size:clamp(18px,3vh,28px);color:#F3C23C;margin-top:18px}
+
 </style>
 </head>
 <body>
@@ -444,6 +464,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
   <footer class="bottom">
     <span class="ac-group" id="acGroup"><button class="btn ic-btn" id="btn-ac"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5 12 6l3-2.5M9 20.5l3-2.5 3 2.5M3.3 10.1l3.9 1-1 3.8M20.7 13.9l-3.9-1 1-3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Aircon</button></span>
     <button class="btn ic-btn" id="btn-door"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Doorbell</button>
+    <button class="btn" id="btn-laundry">Laundry timer</button>
     <span class="menu-wrap">
       <button class="btn ic-btn" id="btn-menu" aria-haspopup="true" aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg>More</button>
       <div class="menu" id="menu" role="menu" hidden>
@@ -615,7 +636,7 @@ body.night #dim{opacity:.65;pointer-events:auto}
     <div class="sv-time" id="svTime"></div>
     <div class="sv-date" id="svDate"></div>
     <div class="sv-tz" id="svTz"></div>
-    <div class="sv-wx" id="svWx"></div>
+    <div class="sv-wx" id="svWx"></div><div id="svLaundry" hidden></div>
   </div>
 </div>
 <div class="overlay picker" id="picker" role="dialog" aria-label="Choose an option">
@@ -633,9 +654,30 @@ body.night #dim{opacity:.65;pointer-events:auto}
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="dim"></div>
 
+<div class="laundry-shade" id="laundryOverlay" hidden>
+ <section class="laundry-card" role="dialog" aria-modal="true" aria-labelledby="laundryTitle" tabindex="-1">
+  <h2 id="laundryTitle">Laundry timer</h2>
+  <button class="btn laundry-close" id="laundryClose" aria-label="Close laundry timer">×</button>
+  <div id="laundryCount" class="laundry-count"></div>
+  <p id="laundryFinish" class="laundry-note"></p>
+  <label class="field" id="laundryDurationField">Duration (minutes)<input id="laundryDuration" type="number" min="1" max="1440" step="1" value="75" inputmode="numeric"></label>
+  <div class="laundry-actions">
+   <button class="btn" id="laundryMinus">−5 min</button><button class="btn" id="laundryPlus">+5 min</button>
+   <button class="btn primary" id="laundryStart">Start timer</button>
+   <button class="btn" id="laundryPause">Pause</button><button class="btn" id="laundryCancel">Cancel timer</button>
+  </div>
+  <div id="laundrySoundControls">
+   <label class="field">Chime<select id="laundryChime"><option value="bell">Gentle bell</option><option value="melody">Three-note melody</option><option value="beep">Beep</option><option value="silent">Silent</option></select></label>
+   <label class="field">Chime volume <span id="laundryVolumeLabel"></span><input id="laundryVolume" aria-label="Chime volume" type="range" min="0" max="100" step="5"></label>
+   <div class="laundry-actions"><button class="btn" id="laundryPreview">Preview chime</button></div>
+   <p class="laundry-note" id="laundryAudioStatus" role="status">The tablet's media volume also affects the chime.</p>
+  </div>
+ </section>
+</div>
+
 <script>
-const APP_VERSION = "1.3";
-const VERSIONS = [{"v": "1.3","d": "27 Sept","t": "A quick tour of the dashboard, a How to use guide with a colour key, and a Large text option."},{"v": "1.2","d": "27 Sept","t": "A second clock for Melbourne, with daylight saving handled automatically. Views close when you tap outside them or after two minutes idle, buses under two minutes away and events starting within 15 minutes turn amber, icons and tap feedback on the footer buttons, and warmer colours after midnight."},{"v": "1.1","d": "27 Sept","t": "Your own calendar panel: today's events in the dashboard's style, read through your relay, with countdowns, tap-in details, a three-week list behind Expand, and options by tapping and holding the panel."},{"v": "1.0","d": "27 Sept","t": "Bus, MTR and aircon updates pause while the clock screen shows, and refresh as soon as you walk past or tap. Settings backup and restore, a quiet refresh every night at 4am, and this About section with a status check and version history."},{"v": "0.20","d": "27 Sept","t": "Stale-data and connection warnings, timetable estimates shown lighter, tap for bus details and tap and hold to edit, the More menu, clearer Settings, bigger text, and a fix for Settings wiping your MTR stations."},{"v": "0.19","d": "27 Sept","t": "Automatic switch to overnight N routes after the last bus."},{"v": "0.18","d": "27 Sept","t": "Night light fixes: only when idle, a pause after taps, its own hours, and one tap to wake."},{"v": "0.17","d": "27 Sept","t": "Today and Tomorrow in matching detail, tap-in days, and sunrise and sunset for each day."},{"v": "0.16","d": "26 Sept","t": "One-tap aircon buttons through Tuya, with an All off button."},{"v": "0.15","d": "26 Sept","t": "Tap a warning for the Observatory's full statement."},{"v": "0.14","d": "26 Sept","t": "Searchable lists for routes, stops and stations."},{"v": "0.13","d": "26 Sept","t": "Black clock screensaver after 10 minutes, and a motion-triggered night light."},{"v": "0.12","d": "26 Sept","t": "Edit a bus panel by tapping it, and edit MTR stations on any line."},{"v": "0.11","d": "26 Sept","t": "Moved to GitHub Pages for the new tablet, with your email removed from the public page, and more reliable Aircon and Doorbell buttons."},{"v": "0.10","d": "24 Sept","t": "Next public holiday on the dashboard, and a tap-in list of holidays with long-weekend tags."},{"v": "0.9","d": "24 Sept","t": "Weather detail page, redesigned with big icons for reading across the room. Live tram times were tried and removed, since Hong Kong Tramways doesn't make them available."},{"v": "0.8","d": "24 Sept","t": "Auto theme by default, calendar opens in List view, clock-tap fix, and a sunrise timing fix."},{"v": "0.7","d": "24 Sept","t": "KMB routes added, with both companies' buses shown on jointly run routes."},{"v": "0.6","d": "24 Sept","t": "Sunrise and sunset theme with tap-the-clock override, and route, direction and stop dropdowns using Citybus data."},{"v": "0.5","d": "24 Sept","t": "Settings page for bus routes, themes and weather location, plus a full-screen calendar."},{"v": "0.4","d": "24 Sept","t": "MTR times for Wan Chai and Exhibition Centre, the UV index, and heat and cold warnings."},{"v": "0.3","d": "24 Sept","t": "To Kwun Tong panel (601, 619), then a 2x2 bus grid with a new Airport and West panel (A11, 111, 101)."},{"v": "0.2","d": "24 Sept","t": "Refresh button, weather labelled as Wan Chai with local rainfall, and layout fixes so the panels fill the screen."},{"v": "0.1","d": "24 Sept","t": "First dashboard: clock, Observatory weather and warnings, live Citybus times from Hennessy Road Govt Primary School and Burrows Street, Google Calendar, Aircon and Doorbell app buttons, and night dimming."}];
+const APP_VERSION = "1.4";
+const VERSIONS = [{v:"1.4",d:"16 Oct",t:"Laundry timer with a saved countdown, adjustable duration, chime choices and volume, and a persistent ready reminder."},{"v": "1.3","d": "27 Sept","t": "A quick tour of the dashboard, a How to use guide with a colour key, and a Large text option."},{"v": "1.2","d": "27 Sept","t": "A second clock for Melbourne, with daylight saving handled automatically. Views close when you tap outside them or after two minutes idle, buses under two minutes away and events starting within 15 minutes turn amber, icons and tap feedback on the footer buttons, and warmer colours after midnight."},{"v": "1.1","d": "27 Sept","t": "Your own calendar panel: today's events in the dashboard's style, read through your relay, with countdowns, tap-in details, a three-week list behind Expand, and options by tapping and holding the panel."},{"v": "1.0","d": "27 Sept","t": "Bus, MTR and aircon updates pause while the clock screen shows, and refresh as soon as you walk past or tap. Settings backup and restore, a quiet refresh every night at 4am, and this About section with a status check and version history."},{"v": "0.20","d": "27 Sept","t": "Stale-data and connection warnings, timetable estimates shown lighter, tap for bus details and tap and hold to edit, the More menu, clearer Settings, bigger text, and a fix for Settings wiping your MTR stations."},{"v": "0.19","d": "27 Sept","t": "Automatic switch to overnight N routes after the last bus."},{"v": "0.18","d": "27 Sept","t": "Night light fixes: only when idle, a pause after taps, its own hours, and one tap to wake."},{"v": "0.17","d": "27 Sept","t": "Today and Tomorrow in matching detail, tap-in days, and sunrise and sunset for each day."},{"v": "0.16","d": "26 Sept","t": "One-tap aircon buttons through Tuya, with an All off button."},{"v": "0.15","d": "26 Sept","t": "Tap a warning for the Observatory's full statement."},{"v": "0.14","d": "26 Sept","t": "Searchable lists for routes, stops and stations."},{"v": "0.13","d": "26 Sept","t": "Black clock screensaver after 10 minutes, and a motion-triggered night light."},{"v": "0.12","d": "26 Sept","t": "Edit a bus panel by tapping it, and edit MTR stations on any line."},{"v": "0.11","d": "26 Sept","t": "Moved to GitHub Pages for the new tablet, with your email removed from the public page, and more reliable Aircon and Doorbell buttons."},{"v": "0.10","d": "24 Sept","t": "Next public holiday on the dashboard, and a tap-in list of holidays with long-weekend tags."},{"v": "0.9","d": "24 Sept","t": "Weather detail page, redesigned with big icons for reading across the room. Live tram times were tried and removed, since Hong Kong Tramways doesn't make them available."},{"v": "0.8","d": "24 Sept","t": "Auto theme by default, calendar opens in List view, clock-tap fix, and a sunrise timing fix."},{"v": "0.7","d": "24 Sept","t": "KMB routes added, with both companies' buses shown on jointly run routes."},{"v": "0.6","d": "24 Sept","t": "Sunrise and sunset theme with tap-the-clock override, and route, direction and stop dropdowns using Citybus data."},{"v": "0.5","d": "24 Sept","t": "Settings page for bus routes, themes and weather location, plus a full-screen calendar."},{"v": "0.4","d": "24 Sept","t": "MTR times for Wan Chai and Exhibition Centre, the UV index, and heat and cold warnings."},{"v": "0.3","d": "24 Sept","t": "To Kwun Tong panel (601, 619), then a 2x2 bus grid with a new Airport and West panel (A11, 111, 101)."},{"v": "0.2","d": "24 Sept","t": "Refresh button, weather labelled as Wan Chai with local rainfall, and layout fixes so the panels fill the screen."},{"v": "0.1","d": "24 Sept","t": "First dashboard: clock, Observatory weather and warnings, live Citybus times from Hennessy Road Govt Primary School and Burrows Street, Google Calendar, Aircon and Doorbell app buttons, and night dimming."}];
 /* ======== DEFAULTS (Settings on screen override these) ======== */
 const DEFAULTS = {
   calendarId: "",
@@ -807,7 +849,7 @@ function saverText(){
   $("svWx").innerHTML = (icon && !icon.hidden && icon.src ? `<img src="${esc(icon.src)}" alt="">` : "") + esc($("temp").textContent || "");
 }
 function showSaver(){
-  if (saverOn) return;
+  if (saverOn || !$("laundryOverlay").hidden) return;
   saverOn = true;
   const el = $("saver");
   saverText(); el.hidden = false;
@@ -937,6 +979,7 @@ function wakeDashboard(){                                   // show the dashboar
   if (isNightHours()){ undimUntil = Date.now() + 60000; document.body.classList.remove("night"); }
 }
 window.__dashMotion = () => {
+  if (!$("laundryOverlay").hidden) return;
   if (saverOn && Date.now() - lastRefreshAll > 60000) refreshAll();   // get times ready as someone approaches
   if (nlOn){ showNightlight(); return; }                     // someone's still around: keep the glow on
   const nlTime = S.nightlight?.on && isNightlightHours();
@@ -2498,6 +2541,152 @@ $("btn-tour").onclick = () => { closeMenu(); startTour(); };
 $("offerYes").onclick = startTour;
 $("offerNo").onclick = () => { $("tourOffer").hidden = true; store.set("tourOffered", true); };
 if (!store.get("tourOffered")) setTimeout(() => { if ($("tour").hidden) $("tourOffer").hidden = false; }, 2500);
+
+/* ---- Laundry timer: absolute finish time survives reloads and idle mode ---- */
+const LAUNDRY_KEY = 'laundryTimerV1';
+const laundrySaved = store.get(LAUNDRY_KEY) || {};
+let laundry = {
+  minutes: Number.isInteger(laundrySaved.minutes) && laundrySaved.minutes >= 1 && laundrySaved.minutes <= 1440 ? laundrySaved.minutes : 75,
+  chime: ['bell','melody','beep','silent'].includes(laundrySaved.chime) ? laundrySaved.chime : 'bell',
+  volume: Number.isFinite(laundrySaved.volume) ? Math.max(0, Math.min(100, laundrySaved.volume)) : 60,
+  state: ['running','paused','done'].includes(laundrySaved.state) ? laundrySaved.state : 'idle',
+  end: Number.isFinite(laundrySaved.end) ? laundrySaved.end : 0,
+  remaining: Number.isFinite(laundrySaved.remaining) ? laundrySaved.remaining : 0,
+  sounded: laundrySaved.sounded === true
+};
+if ((laundry.state === 'running' || laundry.state === 'done') && laundry.end <= 0) laundry.state = 'idle';
+if (laundry.state === 'paused' && laundry.remaining <= 0) laundry.state = 'idle';
+const saveLaundry = () => store.set(LAUNDRY_KEY, laundry);
+let laundryAudio = null, laundryPreviousFocus = null, laundryPlaying = [];
+async function unlockLaundryAudio(){
+  const Audio = window.AudioContext || window.webkitAudioContext;
+  if (!Audio) throw new Error('Audio is unavailable in this browser.');
+  if (!laundryAudio || laundryAudio.state === 'closed') laundryAudio = new Audio();
+  if (laundryAudio.state === 'suspended') await laundryAudio.resume();
+  if (laundryAudio.state !== 'running') throw new Error('Tap Preview chime to enable sound.');
+}
+function stopLaundrySound(){
+  laundryPlaying.forEach(o => { try { o.stop(); } catch {} });
+  laundryPlaying = [];
+}
+async function playLaundryChime(){
+  stopLaundrySound();
+  if (laundry.chime === 'silent' || !laundry.volume) return;
+  try {
+    await unlockLaundryAudio();
+    const tones = laundry.chime === 'melody' ? [[523.25,0,.45],[659.25,.4,.45],[783.99,.8,.8]] : laundry.chime === 'beep' ? [[880,0,.18],[880,.3,.18]] : [[659.25,0,1.6],[987.77,.15,1.3]];
+    const now = laundryAudio.currentTime;
+    tones.forEach(([freq,delay,length]) => {
+      const osc = laundryAudio.createOscillator(), gain = laundryAudio.createGain(), at = now + delay;
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, at);
+      gain.gain.linearRampToValueAtTime(laundry.volume / 100 * .22, at + .015);
+      gain.gain.exponentialRampToValueAtTime(.0001, at + length);
+      osc.connect(gain); gain.connect(laundryAudio.destination);
+      osc.start(at); osc.stop(at + length + .02); laundryPlaying.push(osc);
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+    });
+    $('laundryAudioStatus').textContent = "The tablet's media volume also affects the chime.";
+  } catch (e) { $('laundryAudioStatus').textContent = 'Sound could not play. ' + e.message; }
+}
+const laundryLeft = () => laundry.state === 'running' ? Math.max(0, laundry.end - Date.now()) : laundry.remaining;
+const laundryTime = ms => new Date(ms).toLocaleTimeString('en-GB', {hour:'numeric', minute:'2-digit', hour12:!S.clock24h});
+function laundryCountdown(ms){
+  const seconds = Math.max(0, Math.ceil(ms / 1000));
+  return `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
+}
+function openLaundry(){
+  if ($('laundryOverlay').hidden) laundryPreviousFocus = document.activeElement;
+  closeMenu(); hideNightlight(); hideSaver();
+  document.body.classList.remove('night'); undimUntil = Date.now() + 60000;
+  $('laundryOverlay').hidden = false; renderLaundry();
+  $('laundryClose').focus();
+}
+function closeLaundry(){
+  stopLaundrySound();
+  if (laundry.state === 'done') { laundry.state = 'idle'; laundry.end = 0; laundry.remaining = 0; saveLaundry(); }
+  $('laundryOverlay').hidden = true; renderLaundry();
+  (laundryPreviousFocus?.isConnected ? laundryPreviousFocus : $('btn-laundry')).focus();
+}
+function renderLaundry(){
+  const active = laundry.state === 'running' || laundry.state === 'paused', done = laundry.state === 'done';
+  const left = laundryLeft(), minutes = Math.ceil(left/60000);
+  $('btn-laundry').textContent = done ? 'Laundry is ready' : active ? `Laundry · ${minutes} min${laundry.state === 'paused' ? ' (paused)' : ' left'}` : 'Laundry timer';
+  $('btn-laundry').classList.toggle('running', active); $('btn-laundry').classList.toggle('ready', done);
+  $('svLaundry').hidden = !active && !done;
+  $('svLaundry').textContent = done ? 'Laundry is ready' : `Laundry · ${minutes} min${laundry.state === 'paused' ? ' (paused)' : ' left'}`;
+  $('laundryTitle').textContent = done ? 'Laundry is ready' : 'Laundry timer';
+  $('laundryCount').textContent = done ? 'Ready' : active ? laundryCountdown(left) : `${laundry.minutes} min`;
+  const ago = Math.max(0, Math.floor((Date.now()-laundry.end)/60000));
+  $('laundryFinish').textContent = done ? (ago ? `Finished ${ago} minute${ago === 1 ? '' : 's'} ago, at ${laundryTime(laundry.end)}.` : `Finished at ${laundryTime(laundry.end)}.`) : laundry.state === 'running' ? `Finishes at ${laundryTime(laundry.end)}` : laundry.state === 'paused' ? 'Paused. Resume when your washing machine continues.' : `If started now, finishes at ${laundryTime(Date.now()+laundry.minutes*60000)}`;
+  $('laundryDurationField').hidden = active || done;
+  $('laundryStart').hidden = active || done;
+  $('laundryMinus').hidden = done; $('laundryPlus').hidden = done;
+  $('laundryPause').hidden = !active; $('laundryCancel').hidden = !active;
+  $('laundryPause').textContent = laundry.state === 'paused' ? 'Resume' : 'Pause';
+  $('laundrySoundControls').hidden = done;
+  $('laundryVolumeLabel').textContent = `${laundry.volume}%`;
+}
+function laundryTick(){
+  if (laundry.state === 'running' && Date.now() >= laundry.end) {
+    laundry.state = 'done';
+    const sound = !laundry.sounded; laundry.sounded = true; saveLaundry();
+    openLaundry(); if (sound) void playLaundryChime();
+  }
+  renderLaundry();
+}
+$('laundryDuration').value = laundry.minutes;
+$('laundryChime').value = laundry.chime; $('laundryVolume').value = laundry.volume;
+$('btn-laundry').onclick = () => { void unlockLaundryAudio().catch(() => {}); openLaundry(); };
+$('laundryClose').onclick = closeLaundry;
+$('laundryDuration').oninput = () => {
+  const value = Number($('laundryDuration').value);
+  const valid = Number.isInteger(value) && value >= 1 && value <= 1440;
+  $('laundryStart').disabled = !valid;
+  if (valid) { laundry.minutes = value; saveLaundry(); renderLaundry(); }
+};
+$('laundryStart').onclick = () => {
+  if (laundry.state !== 'idle' || !$('laundryDuration').reportValidity()) return;
+  void unlockLaundryAudio().catch(e => { $('laundryAudioStatus').textContent = e.message; });
+  laundry.state = 'running'; laundry.end = Date.now() + laundry.minutes*60000; laundry.sounded = false;
+  saveLaundry(); closeLaundry();
+};
+function adjustLaundry(delta){
+  if (laundry.state === 'running') laundry.end = Math.min(Date.now()+1440*60000, Math.max(Date.now()+1000, laundry.end + delta*60000));
+  else if (laundry.state === 'paused') laundry.remaining = Math.min(1440*60000, Math.max(1000, laundry.remaining + delta*60000));
+  else if (laundry.state === 'idle') { laundry.minutes = Math.min(1440, Math.max(1, laundry.minutes + delta)); $('laundryDuration').value = laundry.minutes; $('laundryStart').disabled = false; }
+  saveLaundry(); renderLaundry();
+}
+$('laundryMinus').onclick = () => adjustLaundry(-5); $('laundryPlus').onclick = () => adjustLaundry(5);
+$('laundryPause').onclick = () => {
+  laundryTick();
+  if (laundry.state === 'running') { laundry.remaining = laundryLeft(); laundry.state = 'paused'; }
+  else if (laundry.state === 'paused') { void unlockLaundryAudio().catch(() => {}); laundry.end = Date.now()+laundry.remaining; laundry.state = 'running'; }
+  saveLaundry(); renderLaundry();
+};
+$('laundryCancel').onclick = () => {
+  if (!confirm('Cancel the running laundry timer?')) return;
+  laundry.state = 'idle'; laundry.end = 0; laundry.remaining = 0; saveLaundry(); renderLaundry();
+};
+$('laundryChime').onchange = () => { stopLaundrySound(); laundry.chime = $('laundryChime').value; saveLaundry(); };
+$('laundryVolume').oninput = () => { laundry.volume = Number($('laundryVolume').value); saveLaundry(); renderLaundry(); };
+$('laundryPreview').onclick = () => void playLaundryChime();
+$('laundryOverlay').addEventListener('keydown', e => {
+  if (e.key === 'Escape') { e.stopPropagation(); closeLaundry(); }
+  if (e.key !== 'Tab') return;
+  const items = [...$('laundryOverlay').querySelectorAll('button,input,select')].filter(el => !el.disabled && el.getClientRects().length);
+  const first = items[0], last = items[items.length-1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+// An interaction after a reload also restores browser audio permission for this page.
+window.addEventListener('pointerdown', () => { if (laundry.state === 'running') void unlockLaundryAudio().catch(() => {}); }, {passive:true});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) laundryTick(); });
+window.addEventListener('pageshow', laundryTick);
+renderLaundry();
+if (laundry.state === 'done') openLaundry();
+laundryTick(); setInterval(laundryTick, 1000);
+
 
 /* ---- start ---- */
 applyTheme(); buildPanels();
